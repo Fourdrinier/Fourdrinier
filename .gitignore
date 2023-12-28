@@ -3,3 +3,7 @@
 
 # Secrets
 .env
+
+# Storage
+/storage/*
+!/storage/README.md
