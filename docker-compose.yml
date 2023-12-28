@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    env_file:
+      .env
+    volumes:
+      - ./storage:/storage
+    ports:
+      - "8000:8000"
