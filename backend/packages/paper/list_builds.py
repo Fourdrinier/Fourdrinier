@@ -13,7 +13,7 @@ def list_builds(version):
     url = f"https://api.papermc.io/v2/projects/paper/versions/{version}/builds"
     response = requests.get(url)
     if response.status_code == 404:
-        raise Exception(f"No builds for version {version} were found.")
+        raise InvalidVersionException(version)
     response_json = response.json()
     builds = response_json["builds"]
 
@@ -28,3 +28,9 @@ def list_builds(version):
         ] = f"https://api.papermc.io/v2/projects/paper/versions/{version}/builds/{build_id}/downloads/{file}"
 
     return builds
+
+
+class InvalidVersionException(Exception):
+    def __init__(self, version):
+        self.message = f"No builds for version {version} were found."
+        super().__init__(self.message)
