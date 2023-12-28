@@ -2,7 +2,7 @@ FROM python:3.11
 WORKDIR /app
 
 # Install Poetry for dependency management
-RUN pip isntall poetry
+RUN pip install poetry
 
 COPY pyproject.toml poetry.lock* /app/
 
