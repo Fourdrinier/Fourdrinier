@@ -16,7 +16,7 @@ AsyncSessionLocal = sessionmaker(
 
 
 def generate_unique_id():
-    return secrets.token_urlsafe(8)
+    return secrets.token_hex(4)
 
 
 async def get_db():

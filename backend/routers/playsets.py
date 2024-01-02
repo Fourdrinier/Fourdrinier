@@ -6,7 +6,7 @@ routers/playsets.py
 
 Endpoints allowing for interaction with user playsets
 """
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -36,3 +36,12 @@ async def create_playset(
     await db.refresh(new_playset)
 
     return new_playset
+
+
+@router.get("/{playset_id}")
+async def show_playset(playset_id: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Playset).where(Playset.id == playset_id))
+    playset = result.scalars().first()
+    if playset is None:
+        raise HTTPException(status_code=404, detail="Playset not found")
+    return playset
