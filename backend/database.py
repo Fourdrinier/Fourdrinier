@@ -1,4 +1,5 @@
 import os
+import secrets
 from typing import cast, Type
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -12,6 +13,10 @@ engine = create_async_engine(DATABASE_URL)
 AsyncSessionLocal = sessionmaker(
     bind=engine, class_=cast(Type[AsyncSession], AsyncSession), expire_on_commit=False
 )
+
+
+def generate_unique_id():
+    return secrets.token_urlsafe(8)
 
 
 async def get_db():
