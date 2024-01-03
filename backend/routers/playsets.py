@@ -49,6 +49,25 @@ async def show_playset(playset_id: str, db: AsyncSession = Depends(get_db)):
     return response
 
 
+@router.delete("/{playset_id}")
+async def delete_playset(playset_id: str, db: AsyncSession = Depends(get_db)):
+    playset = await db.get(Playset, playset_id)
+    if not playset:
+        raise HTTPException(status_code=404, detail="Playset not found")
+    await db.delete(playset)
+    await db.commit()
+
+    # Remove any orphaned mods (that are no longer associated with any playsets)
+    orphaned_mods = (await db.execute(
+        select(Mod).where(~Mod.playsets.any())
+    )).scalars().all()
+    for mod in orphaned_mods:
+        await db.delete(mod)
+    await db.commit()
+
+    return {"message": "Playset deleted"}
+
+
 @router.post("/{playset_id}/mods")
 async def add_mod_to_playset(playset_id: str, mod_data: AddModToPlaysetSchema, db: AsyncSession = Depends(get_db)):
     # Check if Mod exists
@@ -81,6 +100,7 @@ async def add_mod_to_playset(playset_id: str, mod_data: AddModToPlaysetSchema, d
 
     response = PlaysetResponse(id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods])
     return response
+
 
 @router.delete("/{playset_id}/mods/{mod_id}")
 async def remove_mod_from_playset(playset_id: str, mod_id: str, db: AsyncSession = Depends(get_db)):
