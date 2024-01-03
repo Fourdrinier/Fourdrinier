@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PlaysetCreateSchema(BaseModel):
@@ -14,3 +14,9 @@ class AddModToPlaysetSchema(BaseModel):
 
 class RenamePlaysetSchema(BaseModel):
     name: str
+
+
+class ServerCreateSchema(BaseModel):
+    name: str = Field(default="My Server", example='Vanilla+ Server')
+    loader: str = Field(..., pattern='^(paper|fabric)$', example='paper')
+    game_version: str = Field(..., pattern=r'^\d+\.\d+\.\d+$', example='1.16.5')

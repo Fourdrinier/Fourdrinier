@@ -25,8 +25,8 @@ class Server(Base):
     __tablename__ = "server"
     id = Column(String, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)  # EX: "My Paper Server"
-    distribution = Column(String, index=True, nullable=False)  # EX: "paper"
-    mc_version = Column(String, index=True, nullable=False)  # EX: "1.16.5"
+    loader = Column(String, index=True, nullable=False)  # EX: "paper"
+    game_version = Column(String, index=True, nullable=False)  # EX: "1.16.5"
 
 
 class Playset(Base):
