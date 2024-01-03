@@ -16,8 +16,3 @@ app.include_router(servers_router, prefix="/servers")
 @app.on_event("startup")
 async def startup():
     await models.create_tables(engine)
-
-
-@app.get("/")
-async def hello_world():
-    return "Hello, world!"
