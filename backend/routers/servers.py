@@ -13,6 +13,7 @@ from sqlalchemy.orm import selectinload
 
 from backend.database import get_db, generate_unique_id
 from backend.models import Server, Playset, ServerResponse, PlaysetResponse
+from backend.packages.fabric.build_server import build_server as build_fabric_server
 from backend.schema import ServerCreateSchema, AddPlaysetToServerSchema
 
 router = APIRouter()
@@ -78,3 +79,15 @@ async def remove_playset_from_server(
     await db.commit()
     await db.refresh(server)
     return server
+
+
+@router.post("/{server_id}/build")
+async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
+    server = await db.get(Server, server_id)
+    if server is None:
+        raise HTTPException(status_code=404, detail="Server not found")
+    match server.loader:
+        case "fabric":
+            dockerfile_contents = build_fabric_server(server)
+
+    return dockerfile_contents
