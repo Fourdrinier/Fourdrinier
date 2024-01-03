@@ -6,13 +6,15 @@ routers/playsets.py
 
 Endpoints allowing for interaction with user playsets
 """
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import selectinload
 from backend.database import get_db, generate_unique_id
-from backend.models import Playset
-from backend.schema import PlaysetCreateSchema
+from backend.models import Playset, Mod, PlaysetResponse
+from backend.schema import PlaysetCreateSchema, AddModToPlaysetSchema
 
 router = APIRouter()
 
@@ -40,8 +42,42 @@ async def create_playset(
 
 @router.get("/{playset_id}")
 async def show_playset(playset_id: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Playset).where(Playset.id == playset_id))
-    playset = result.scalars().first()
+    playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
     if playset is None:
         raise HTTPException(status_code=404, detail="Playset not found")
-    return playset
+    response = PlaysetResponse(id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods])
+    return response
+
+
+@router.post("/{playset_id}/mods")
+async def add_mod_to_playset(playset_id: str, mod_data: AddModToPlaysetSchema, db: AsyncSession = Depends(get_db)):
+    # Check if Mod exists
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"https://api.modrinth.com/v2/project/{mod_data.mod_id}")
+        if response.status_code != 200:
+            raise HTTPException(status_code=404, detail="Mod not found in Modrinth API")
+        else:
+            title = response.json().get("title")
+
+    mod = await db.get(Mod, mod_data.mod_id)
+    if mod is None:
+        # Create Mod if it doesn't exist
+        mod = Mod(id=mod_data.mod_id, title=title)
+        db.add(mod)
+        await db.commit()
+        await db.refresh(mod)
+
+    # Inside your async function
+    playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
+    if playset is None:
+        raise HTTPException(status_code=404, detail="Playset not found")
+
+    if mod not in playset.mods:
+        playset.mods.append(mod)
+        await db.commit()
+        await db.refresh(playset)
+    else:
+        pass
+
+    response = PlaysetResponse(id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods])
+    return response
