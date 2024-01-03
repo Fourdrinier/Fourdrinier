@@ -27,7 +27,6 @@ class Server(Base):
     name = Column(String, index=True, nullable=False)  # EX: "My Paper Server"
     distribution = Column(String, index=True, nullable=False)  # EX: "paper"
     mc_version = Column(String, index=True, nullable=False)  # EX: "1.16.5"
-    build_version = Column(String, index=True, nullable=False)  # EX: "652"
 
 
 class Playset(Base):
