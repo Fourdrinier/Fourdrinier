@@ -10,11 +10,10 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import selectinload
 from backend.database import get_db, generate_unique_id
 from backend.models import Playset, Mod, PlaysetResponse
-from backend.schema import PlaysetCreateSchema, AddModToPlaysetSchema
+from backend.schema import PlaysetCreateSchema, AddModToPlaysetSchema, RenamePlaysetSchema
 
 router = APIRouter()
 
@@ -48,6 +47,21 @@ async def show_playset(playset_id: str, db: AsyncSession = Depends(get_db)):
     response = PlaysetResponse(id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods])
     return response
 
+
+@router.patch("/{playset_id}")
+async def rename_playset(playset_id: str, new_data: RenamePlaysetSchema, db: AsyncSession = Depends(get_db)):
+    playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
+    if not playset:
+        raise HTTPException(status_code=404, detail="Playset not found")
+
+    playset.name = new_data.name
+    db.add(playset)
+    await db.commit()
+    await db.refresh(playset)
+    response = PlaysetResponse(
+        id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods]
+    )
+    return response
 
 @router.delete("/{playset_id}")
 async def delete_playset(playset_id: str, db: AsyncSession = Depends(get_db)):

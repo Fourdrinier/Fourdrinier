@@ -10,3 +10,7 @@ class PlaysetCreateSchema(BaseModel):
 
 class AddModToPlaysetSchema(BaseModel):
     mod_id: str
+
+
+class RenamePlaysetSchema(BaseModel):
+    name: str
