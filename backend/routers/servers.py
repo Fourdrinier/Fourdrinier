@@ -65,3 +65,16 @@ async def add_playset_to_server(
         ),
     )
     return response
+
+
+@router.delete("/{server_id}/playset")
+async def remove_playset_from_server(
+    server_id: str, db: AsyncSession = Depends(get_db)
+):
+    server = await db.get(Server, server_id)
+    if server is None:
+        raise HTTPException(status_code=404, detail="Server not found")
+    server.playset_id = None
+    await db.commit()
+    await db.refresh(server)
+    return server
