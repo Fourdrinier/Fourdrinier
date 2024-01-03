@@ -81,3 +81,24 @@ async def add_mod_to_playset(playset_id: str, mod_data: AddModToPlaysetSchema, d
 
     response = PlaysetResponse(id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods])
     return response
+
+@router.delete("/{playset_id}/mods/{mod_id}")
+async def remove_mod_from_playset(playset_id: str, mod_id: str, db: AsyncSession = Depends(get_db)):
+    playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
+    if not playset:
+        raise HTTPException(status_code=404, detail="Playset not found")
+
+    mod = await db.get(Mod, mod_id)
+    if not mod:
+        raise HTTPException(status_code=404, detail="Mod not found")
+
+    if mod in playset.mods:
+        playset.mods.remove(mod)
+        await db.commit()
+    else:
+        pass
+
+    response = PlaysetResponse(
+        id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods]
+    )
+    return response
