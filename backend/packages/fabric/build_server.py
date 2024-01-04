@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 
+import docker
 import httpx
 from fastapi import HTTPException
 
@@ -64,7 +65,25 @@ async def build_server(server):
     with open(os.path.join(server_directory, "Dockerfile"), "w") as dockerfile:
         dockerfile.write(tailored_dockerfile)
 
-    return tailored_dockerfile
+    # Create a Docker client
+    client = docker.from_env()
+    image_name = "fabric-" + server["id"]
+    # The low-level API client gives more control and returns a generator
+    low_level_client = docker.APIClient(base_url="unix://var/run/docker.sock")
+    # Stream the build output
+    response = low_level_client.build(
+        path=server_directory, tag=image_name, decode=True
+    )
+    build_log = []
+    for item in response:
+        message = item.get("stream") or item.get("aux")
+        if message and message != "\n":
+            build_log.append(message)
+    if "Successfully built" in build_log[-2]:
+        return {"image_name": image_name}
+    else:
+        client.images.remove(image=image_name)
+        raise HTTPException(status_code=500, detail="Failed to build Docker image")
 
 
 async def get_java_requirement(game_version):
