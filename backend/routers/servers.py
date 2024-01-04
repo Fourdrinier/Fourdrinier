@@ -83,11 +83,11 @@ async def remove_playset_from_server(
 
 @router.post("/{server_id}/build")
 async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
-    server = await db.get(Server, server_id)
+    server = await db.get(Server, server_id, options=[selectinload(Server.playset)])
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
     match server.loader:
         case "fabric":
-            response = await build_fabric_server(server)
+            response = await build_fabric_server(server, db)
 
     return response

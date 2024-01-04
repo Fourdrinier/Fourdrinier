@@ -4,6 +4,15 @@ WORKDIR /minecraft
 # Download the latest version of Fabric for Minecraft version ${GAME_VERSION}
 ADD "${LOADER_URL}" /minecraft/fabric.jar
 
+# Download the Fabric API mod, as it is required for most Fabric mods
+ADD "${FABRIC_API_URL}" /minecraft/mods/
+
+# Download specified mods
+# ${MOD_DOWNLOADS}
+
+# Download mods listed as required dependencies of specified mods
+# ${DEPENDENCY_DOWNLOADS}
+
 # Accept Minecraft's EULA
 RUN echo 'eula=${EULA}' > /minecraft/eula.txt
 

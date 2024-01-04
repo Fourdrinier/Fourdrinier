@@ -13,21 +13,29 @@ from pathlib import Path
 import docker
 import httpx
 from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
+from backend.models import Playset
+from backend.packages.fabric.get_latest_mod_version import get_latest_mod_version
 from backend.packages.storage.get_server_directory import get_server_directory
 
 
-async def build_server(server):
+async def build_server(server, db: AsyncSession):
     server = {
         "id": server.id,
         "name": server.name,
         "game_version": server.game_version,
-        "playset": None,
+        "playset": await db.get(
+            Playset,
+            server.playset.id,
+            populate_existing=True,
+            options=[selectinload(Playset.mods)],
+        ),
         "port": server.port,
         "eula": server.eula,
         "allocated_memory": server.allocated_memory,
     }
-
     await build_dockerfile(server)
     image_name = await build_docker_image(server)
 
@@ -86,6 +94,9 @@ async def build_dockerfile(server):
     launcher_version = await get_launcher_version()
     api_url = "https://meta.fabricmc.net/v2/versions/loader"
     loader_url = f'{api_url}/{server["game_version"]}/{loader_version}/{launcher_version}/server/jar'
+    fabric_api_mod_url = await get_latest_mod_version(
+        "P7dR8mSH", server["game_version"]
+    )
 
     # Open the boilerplate Dockerfile
     with open(
@@ -93,11 +104,16 @@ async def build_dockerfile(server):
     ) as boilerplate_dockerfile:
         content = boilerplate_dockerfile.read()
 
+    # Build out mod downloads
+    for mod in server["playset"].mods:
+        download_url = await get_latest_mod_version(mod.id, server["game_version"])
+
     # Tailor the boilerplate Dockerfile to the server
     tailored_dockerfile = (
         content.replace("${JAVA_VERSION}", str(java_requirement))
         .replace("${GAME_VERSION}", server["game_version"])
         .replace("${LOADER_URL}", loader_url)
+        .replace("${FABRIC_API_URL}", fabric_api_mod_url)
         .replace("${EULA}", str(server["eula"]).lower())
         .replace("${PORT}", str(server["port"]))
     )
