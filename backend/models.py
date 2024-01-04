@@ -1,7 +1,7 @@
 from typing import List
 
 from pydantic import BaseModel
-from sqlalchemy import Column, String, Table, ForeignKey
+from sqlalchemy import Column, String, Integer, Boolean, Table, ForeignKey
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -31,6 +31,9 @@ class Server(Base):
     game_version = Column(String, index=True, nullable=False)  # EX: "1.16.5"
     playset = relationship("Playset", back_populates="servers")
     playset_id = Column(String, ForeignKey("playset.id"))
+    port = Column(Integer, default=25565)
+    eula = Column(Boolean, default=True)
+    allocated_memory = Column(Integer, default=2048)
 
 
 class Playset(Base):

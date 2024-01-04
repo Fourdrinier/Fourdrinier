@@ -88,6 +88,6 @@ async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Server not found")
     match server.loader:
         case "fabric":
-            dockerfile_contents = build_fabric_server(server)
+            response = await build_fabric_server(server)
 
-    return dockerfile_contents
+    return response
