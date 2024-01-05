@@ -5,7 +5,7 @@ WORKDIR /minecraft
 ADD "${LOADER_URL}" /minecraft/fabric.jar
 
 # Download the Fabric API mod, as it is required for most Fabric mods
-ADD "${FABRIC_API_URL}" /minecraft/mods/
+ADD "${FABRIC_API_URL}" /downloads/
 
 # Download specified mods
 ${MOD_DOWNLOADS}
@@ -22,6 +22,12 @@ RUN echo 'eula=${EULA}' > /minecraft/eula.txt
 # Expose the server's port
 EXPOSE 25565
 
-# Start the Minecraft server
-ARG ALLOCATED_MEMORY='1024M'
-CMD java -Xmx${ALLOCATED_RAM} -jar /minecraft/fabric.jar nogui
+# Copy the entrypoint script into the container
+COPY entrypoint.sh /entrypoint.sh
+
+# Make the entrypoint script executable
+RUN chmod +x /entrypoint.sh
+
+# Command to start the Minecraft server
+ENTRYPOINT ["/bin/sh", "-c", "/entrypoint.sh \"$@\"", "--"]
+CMD ["${ALLOCATED_RAM}"]

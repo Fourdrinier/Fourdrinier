@@ -12,6 +12,7 @@ services:
       POSTGRES_HOST: "db"
       POSTGRES_PORT: "5432"
     volumes:
+      - ${STORAGE_PATH}:/storage
       - /var/run/docker.sock:/var/run/docker.sock
       - /path/to/build/context:/build
     ports:

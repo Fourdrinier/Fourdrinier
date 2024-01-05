@@ -2,12 +2,13 @@
 fabric/build_server.py
 
 @Author - Ethan Brown - ewbrowntech@gmail.com
-@Version - 3 JAN 23
+@Version - 5 JAN 23
 
 Build a server image given its settings
 """
 import json
 import os
+import shutil
 from pathlib import Path
 
 import docker
@@ -38,6 +39,7 @@ async def build_server(server, db: AsyncSession):
         "allocated_memory": server.allocated_memory,
     }
     await build_dockerfile(server)
+    print("Dockerfile build successful")
     image_name = await build_docker_image(server)
 
     return {"image_name": image_name}
@@ -103,8 +105,9 @@ async def build_dockerfile(server):
     fabric_api_mod_url = latest_fabric_api_mod_version["url"]
 
     # Open the boilerplate Dockerfile
+    boilerplate_directory = os.path.join(os.path.dirname(__file__), "boilerplate")
     with open(
-        os.path.join(os.path.dirname(__file__), "boilerplate", "Dockerfile"), "r"
+        os.path.join(boilerplate_directory, "Dockerfile"), "r"
     ) as boilerplate_dockerfile:
         content = boilerplate_dockerfile.read()
 
@@ -153,12 +156,12 @@ async def build_dockerfile(server):
     # Create command block for downloading required dependencies
     download_req_dep_block = ""
     for required_dependency_url in required_dependency_urls:
-        download_req_dep_block += f'ADD "{required_dependency_url}" /downlaods\n'
+        download_req_dep_block += f'ADD "{required_dependency_url}" /downloads/\n'
 
     # Create command block for downloading required dependencies
     download_opt_dep_block = ""
     for optional_dependency_url in optional_dependency_urls:
-        download_opt_dep_block += f'ADD "{optional_dependency_url}" /downloads\n'
+        download_opt_dep_block += f'ADD "{optional_dependency_url}" /downloads/\n'
 
     # Tailor the boilerplate Dockerfile to the server
     tailored_dockerfile = (
@@ -170,20 +173,33 @@ async def build_dockerfile(server):
         .replace("${REQUIRED_DEPENDENCY_DOWNLOADS}", download_req_dep_block)
         .replace("${OPTIONAL_DEPENDENCY_DOWNLOADS}", download_opt_dep_block)
         .replace("${EULA}", str(server["eula"]).lower())
+        .replace("${ALLOCATED_RAM}", str(server["allocated_memory"]) + "M")
     )
 
     # Get the path to the server's storage directory
     server_directory = await get_server_directory(server["id"])
     Path(server_directory).mkdir(parents=True, exist_ok=True)
 
+    # Write the Dockerfile
     with open(os.path.join(server_directory, "Dockerfile"), "w") as dockerfile:
         dockerfile.write(tailored_dockerfile)
+
+    # Copy over the entrypoint script
+    shutil.copy(
+        os.path.join(boilerplate_directory, "entrypoint.sh"),
+        os.path.join(server_directory, "entrypoint.sh"),
+    )
+
+    # Ensure a world and mod directory is present
+    world_folder_path = os.path.join(server_directory, "world")
+    Path(world_folder_path).mkdir(parents=True, exist_ok=True)
+    mod_folder_path = os.path.join(server_directory, "mods")
+    Path(mod_folder_path).mkdir(parents=True, exist_ok=True)
 
 
 async def build_docker_image(server):
     server_directory = await get_server_directory(server["id"])
     image_name = "fabric-" + server["id"]
-
     # Create a Docker client
     with docker.APIClient(base_url="unix://var/run/docker.sock") as low_level_client:
         # Stream the build output
@@ -199,7 +215,7 @@ async def build_docker_image(server):
             build_log.append(message)
 
     # If the build failed, remove the image. Otherwise, return the image name
-    if "Successfully built" in build_log[-2]:
+    if len(build_log) > 0 and "Successfully built" in build_log[-2]:
         return image_name
     else:
         with docker.from_env() as client:
