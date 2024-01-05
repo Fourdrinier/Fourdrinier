@@ -18,6 +18,7 @@ from sqlalchemy.orm import selectinload
 
 from backend.models import Playset
 from backend.packages.fabric.get_latest_mod_version import get_latest_mod_version
+from backend.packages.fabric.get_mod_depencies import get_mod_dependencies
 from backend.packages.storage.get_server_directory import get_server_directory
 
 
@@ -94,9 +95,12 @@ async def build_dockerfile(server):
     launcher_version = await get_launcher_version()
     api_url = "https://meta.fabricmc.net/v2/versions/loader"
     loader_url = f'{api_url}/{server["game_version"]}/{loader_version}/{launcher_version}/server/jar'
-    fabric_api_mod_url = await get_latest_mod_version(
+
+    # Get the URL for the latest version of the Fabric API mod, as it is almost always required
+    latest_fabric_api_mod_version = await get_latest_mod_version(
         "P7dR8mSH", server["game_version"]
     )
+    fabric_api_mod_url = latest_fabric_api_mod_version["url"]
 
     # Open the boilerplate Dockerfile
     with open(
@@ -104,9 +108,63 @@ async def build_dockerfile(server):
     ) as boilerplate_dockerfile:
         content = boilerplate_dockerfile.read()
 
-    # Build out mod downloads
+    # Compile version ID's and dependencies for each mod
+    mod_version_ids = []
+    mod_urls = []
+    required_dependencies = []
+    optional_dependencies = []
     for mod in server["playset"].mods:
-        download_url = await get_latest_mod_version(mod.id, server["game_version"])
+        # Get the latest version of the mod
+        version = await get_latest_mod_version(mod.id, server["game_version"])
+        mod_version_ids.append(version["id"])
+        mod_urls.append(version["url"])
+
+        # Recursively compile the mod's dependencies
+        (
+            version_required_dependencies,
+            version_optional_dependencies,
+        ) = await get_mod_dependencies(version["id"], server["game_version"])
+
+        # Add mod required dependencies to the global required dependencies
+        for dependency in version_required_dependencies:
+            if dependency not in required_dependencies:
+                required_dependencies.append(dependency)
+
+        # Add mod required dependencies to the global optional dependencies
+        for dependency in version_optional_dependencies:
+            if dependency not in optional_dependencies:
+                optional_dependencies.append(dependency)
+
+    # Compile URLs for required dependencies
+    required_dependency_urls = []
+    for dependency in required_dependencies:
+        required_dependency_urls.append(dependency["url"])
+
+    # Compile URLs for optional dependencies
+    optional_dependency_urls = []
+    for dependency in optional_dependencies:
+        optional_dependency_urls.append(dependency["url"])
+
+    # Create command block for downloading specified mods
+    download_mod_block = ""
+    for mod_url in mod_urls:
+        download_mod_block += f'ADD "{mod_url}" /minecraft/mods/\n'
+
+    # Create command block for downloading required dependencies
+    download_req_dep_block = ""
+    for required_dependency_url in required_dependency_urls:
+        download_req_dep_block += f'ADD "{required_dependency_url}" /minecraft/mods\n'
+
+    # Create command block for downloading required dependencies
+    download_opt_dep_block = ""
+    for optional_dependency_url in optional_dependency_urls:
+        download_opt_dep_block += f'ADD "{optional_dependency_url}" /minecraft/mods\n'
+
+    print(download_mod_block)
+    print()
+    print(download_req_dep_block)
+    print()
+    print(download_opt_dep_block)
 
     # Tailor the boilerplate Dockerfile to the server
     tailored_dockerfile = (
@@ -114,6 +172,9 @@ async def build_dockerfile(server):
         .replace("${GAME_VERSION}", server["game_version"])
         .replace("${LOADER_URL}", loader_url)
         .replace("${FABRIC_API_URL}", fabric_api_mod_url)
+        .replace("${MOD_DOWNLOADS}", download_mod_block)
+        .replace("${REQUIRED_DEPENDENCY_DOWNLOADS}", download_req_dep_block)
+        .replace("${OPTIONAL_DEPENDENCY_DOWNLOADS}", download_opt_dep_block)
         .replace("${EULA}", str(server["eula"]).lower())
         .replace("${PORT}", str(server["port"]))
     )

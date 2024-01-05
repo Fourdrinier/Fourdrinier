@@ -8,10 +8,13 @@ ADD "${LOADER_URL}" /minecraft/fabric.jar
 ADD "${FABRIC_API_URL}" /minecraft/mods/
 
 # Download specified mods
-# ${MOD_DOWNLOADS}
+${MOD_DOWNLOADS}
 
 # Download mods listed as required dependencies of specified mods
-# ${DEPENDENCY_DOWNLOADS}
+${REQUIRED_DEPENDENCY_DOWNLOADS}
+
+# Download mods listed as optional dependencies of specified mods
+${OPTIONAL_DEPENDENCY_DOWNLOADS}
 
 # Accept Minecraft's EULA
 RUN echo 'eula=${EULA}' > /minecraft/eula.txt

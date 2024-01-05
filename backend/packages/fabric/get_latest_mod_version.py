@@ -14,5 +14,5 @@ async def get_latest_mod_version(mod_id, game_version):
                 detail="Unable to locate specified mod",
             )
         latest_version = response.json()[0]
-        download_url = latest_version["files"][0]["url"]
-    return download_url
+        url = latest_version["files"][0]["url"]
+    return {"id": latest_version["id"], "url": url}
