@@ -148,23 +148,17 @@ async def build_dockerfile(server):
     # Create command block for downloading specified mods
     download_mod_block = ""
     for mod_url in mod_urls:
-        download_mod_block += f'ADD "{mod_url}" /minecraft/mods/\n'
+        download_mod_block += f'ADD "{mod_url}" /downloads\n'
 
     # Create command block for downloading required dependencies
     download_req_dep_block = ""
     for required_dependency_url in required_dependency_urls:
-        download_req_dep_block += f'ADD "{required_dependency_url}" /minecraft/mods\n'
+        download_req_dep_block += f'ADD "{required_dependency_url}" /downlaods\n'
 
     # Create command block for downloading required dependencies
     download_opt_dep_block = ""
     for optional_dependency_url in optional_dependency_urls:
-        download_opt_dep_block += f'ADD "{optional_dependency_url}" /minecraft/mods\n'
-
-    print(download_mod_block)
-    print()
-    print(download_req_dep_block)
-    print()
-    print(download_opt_dep_block)
+        download_opt_dep_block += f'ADD "{optional_dependency_url}" /downloads\n'
 
     # Tailor the boilerplate Dockerfile to the server
     tailored_dockerfile = (
@@ -176,7 +170,6 @@ async def build_dockerfile(server):
         .replace("${REQUIRED_DEPENDENCY_DOWNLOADS}", download_req_dep_block)
         .replace("${OPTIONAL_DEPENDENCY_DOWNLOADS}", download_opt_dep_block)
         .replace("${EULA}", str(server["eula"]).lower())
-        .replace("${PORT}", str(server["port"]))
     )
 
     # Get the path to the server's storage directory

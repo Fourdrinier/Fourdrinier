@@ -20,7 +20,7 @@ ${OPTIONAL_DEPENDENCY_DOWNLOADS}
 RUN echo 'eula=${EULA}' > /minecraft/eula.txt
 
 # Expose the server's port
-EXPOSE ${PORT}
+EXPOSE 25565
 
 # Start the Minecraft server
 ARG ALLOCATED_MEMORY='1024M'

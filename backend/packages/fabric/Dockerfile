@@ -16,5 +16,5 @@ RUN echo 'eula=${EULA}' > /minecraft/eula.txt
 EXPOSE 25565
 
 # Command to start the Minecraft server
-ARG ALLOCATED_RAM='1024M'
+ARG ALLOCATED_RAM='1024'
 CMD java -Xmx${ALLOCATED_RAM} -jar /minecraft/fabric.jar nogui
