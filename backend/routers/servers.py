@@ -2,7 +2,7 @@
 routers/distributions.py
 
 @Author - Ethan Brown - ewbrowntech@gmail.com
-@Version - 02 JAN 24
+@Version - 05 JAN 24
 
 Endpoints allowing for interaction with hosted files
 """
@@ -10,7 +10,8 @@ import os
 from pathlib import Path
 
 import docker
-from fastapi import APIRouter, Depends, HTTPException
+from docker.errors import NotFound
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -141,5 +142,47 @@ async def run_server(server_id: str, db: AsyncSession = Depends(get_db)):
         volumes=volume_mapping,
         stdin_open=True,
     )
-
     return {"container_id": container.id}
+
+
+@router.post("/{server_id}/stop")
+async def stop_server(server_id: str, db: AsyncSession = Depends(get_db)):
+    server = await db.get(Server, server_id, options=[selectinload(Server.playset)])
+    if server is None:
+        raise HTTPException(status_code=404, detail="Server not found")
+
+    # Get the container
+    container_name = server.loader + "-" + server.id
+    client = docker.from_env()
+    try:
+        container = client.containers.get(container_name)
+    except NotFound:
+        return HTTPException(
+            status_code=404, detail="No container found for given server"
+        )
+
+    match container.status:
+        case "exited":
+            return Response(
+                content="Container was already exited",
+                status_code=status.HTTP_202_ACCEPTED,
+            )
+        case "running" | "paused" | "restarting":
+            container.stop()
+            container.reload()
+            return {"container_id": container.id, "status": container.status}
+        case "dead":
+            HTTPException(
+                status_code=500,
+                detail=f"Container {container_name} is dead. Try rebuilding the server.",
+            )
+        case "removing":
+            HTTPException(
+                status_code=500,
+                detail=f"Container {container_name} is being removed. Try rebuilding the server.",
+            )
+        case _:
+            HTTPException(
+                status_code=500,
+                detail=f"Unable to determine status of {container_name}. Try rebuilding the server.",
+            )
