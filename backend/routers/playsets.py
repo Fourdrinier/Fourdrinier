@@ -16,7 +16,7 @@ from backend.database import get_db, generate_unique_id
 from backend.models import Playset, Mod, PlaysetResponse
 from backend.schema import (
     PlaysetCreateSchema,
-    AddModToPlaysetSchema,
+    AddModsToPlaysetSchema,
     RenamePlaysetSchema,
 )
 
@@ -94,37 +94,42 @@ async def delete_playset(playset_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.post("/{playset_id}/mods")
 async def add_mod_to_playset(
-    playset_id: str, mod_data: AddModToPlaysetSchema, db: AsyncSession = Depends(get_db)
+    playset_id: str,
+    mod_data: AddModsToPlaysetSchema,
+    db: AsyncSession = Depends(get_db),
 ):
-    # Check if Mod exists
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"https://api.modrinth.com/v2/project/{mod_data.mod_id}"
-        )
-        if response.status_code != 200:
-            raise HTTPException(status_code=404, detail="Mod not found in Modrinth API")
-        else:
-            title = response.json().get("title")
-
-    mod = await db.get(Mod, mod_data.mod_id)
-    if mod is None:
-        # Create Mod if it doesn't exist
-        mod = Mod(id=mod_data.mod_id, title=title)
-        db.add(mod)
-        await db.commit()
-        await db.refresh(mod)
-
     # Inside your async function
     playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
     if playset is None:
         raise HTTPException(status_code=404, detail="Playset not found")
 
-    if mod not in playset.mods:
-        playset.mods.append(mod)
-        await db.commit()
-        await db.refresh(playset)
-    else:
-        pass
+    for mod in mod_data.mods:
+        # Check if Mod exists in the Modrinth API
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://api.modrinth.com/v2/project/{mod.mod_id}"
+            )
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=404, detail="Mod not found in Modrinth API"
+                )
+            else:
+                title = response.json().get("title")
+
+        # Check if the mod exists in the database
+        mod_entry = await db.get(Mod, mod.mod_id)
+        if mod_entry is None:
+            mod_entry = Mod(id=mod.mod_id, title=title)
+            db.add(mod_entry)
+            await db.commit()
+            await db.refresh(mod_entry)
+
+        if mod_entry not in playset.mods:
+            playset.mods.append(mod_entry)
+            await db.commit()
+            await db.refresh(playset)
+        else:
+            pass
 
     response = PlaysetResponse(
         id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods]

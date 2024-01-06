@@ -1,7 +1,10 @@
 import httpx
 from fastapi import HTTPException
 
-from backend.packages.fabric.get_latest_mod_version import get_latest_mod_version
+from backend.packages.fabric.get_latest_mod_version import (
+    get_latest_mod_version,
+    NoCompatibleVersionException,
+)
 
 
 async def get_mod_dependencies(
@@ -28,9 +31,17 @@ async def get_mod_dependencies(
 
     # Get the latest version of each of these dependencies and sort them by optional and required
     for dependency_object in dependencies_objects:
-        latest_mod_version = await get_latest_mod_version(
-            dependency_object["project_id"], game_version
-        )
+        if dependency_object["project_id"] == "9CJED7xi":
+            continue
+        try:
+            latest_mod_version = await get_latest_mod_version(
+                dependency_object["project_id"], game_version
+            )
+        except NoCompatibleVersionException:
+            raise HTTPException(
+                status_code=404,
+                detail=f'There is no available version of dependency ID: {dependency_object["project_id"]} compatible with Fabric Minecraft version {game_version}',
+            )
         match dependency_object["dependency_type"]:
             case "required":
                 if latest_mod_version not in required_dependencies:

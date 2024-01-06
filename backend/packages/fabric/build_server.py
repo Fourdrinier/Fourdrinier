@@ -9,6 +9,7 @@ Build a server image given its settings
 import json
 import os
 import shutil
+import time
 from pathlib import Path
 
 import docker
@@ -18,7 +19,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from backend.models import Playset
-from backend.packages.fabric.get_latest_mod_version import get_latest_mod_version
+from backend.packages.fabric.get_latest_mod_version import (
+    get_latest_mod_version,
+    NoCompatibleVersionException,
+)
 from backend.packages.fabric.get_mod_depencies import get_mod_dependencies
 from backend.packages.storage.get_server_directory import get_server_directory
 
@@ -118,7 +122,13 @@ async def build_dockerfile(server):
     optional_dependencies = []
     for mod in server["playset"].mods:
         # Get the latest version of the mod
-        version = await get_latest_mod_version(mod.id, server["game_version"])
+        try:
+            version = await get_latest_mod_version(mod.id, server["game_version"])
+        except NoCompatibleVersionException:
+            raise HTTPException(
+                status_code=404,
+                detail=f'There is no available version of {mod.title} (Project ID: {mod.id}) compatible with Fabric Minecraft version {server["game_version"]}',
+            )
         mod_version_ids.append(version["id"])
         mod_urls.append(version["url"])
 
@@ -137,6 +147,7 @@ async def build_dockerfile(server):
         for dependency in version_optional_dependencies:
             if dependency not in optional_dependencies:
                 optional_dependencies.append(dependency)
+        time.sleep(1)
 
     # Compile URLs for required dependencies
     required_dependency_urls = []

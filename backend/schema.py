@@ -8,8 +8,12 @@ class PlaysetCreateSchema(BaseModel):
     mods: List[Any] = []  # Default to an empty list
 
 
-class AddModToPlaysetSchema(BaseModel):
+class ModSchema(BaseModel):
     mod_id: str
+
+
+class AddModsToPlaysetSchema(BaseModel):
+    mods: List[ModSchema]
 
 
 class RenamePlaysetSchema(BaseModel):
