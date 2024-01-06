@@ -6,8 +6,6 @@ routers/distributions.py
 
 Endpoints allowing for interaction with hosted files
 """
-import os
-from pathlib import Path
 
 import docker
 from docker.errors import NotFound
@@ -19,7 +17,7 @@ from sqlalchemy.orm import selectinload
 from backend.database import get_db, generate_unique_id
 from backend.models import Server, Playset, ServerResponse, PlaysetResponse
 from backend.packages.fabric.build_server import build_server as build_fabric_server
-from backend.packages.storage.get_server_directory import get_server_directory
+from backend.packages.fabric.run_server import run_new_container
 from backend.schema import ServerCreateSchema, AddPlaysetToServerSchema
 
 router = APIRouter()
@@ -105,43 +103,18 @@ async def run_server(server_id: str, db: AsyncSession = Depends(get_db)):
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
 
-    # Ensure a world and mod directory is present
-    server_directory = await get_server_directory(server.id)
-    world_folder_path = os.path.join(server_directory, "world")
-    Path(world_folder_path).mkdir(parents=True, exist_ok=True)
-    mod_folder_path = os.path.join(server_directory, "mods")
-    Path(mod_folder_path).mkdir(parents=True, exist_ok=True)
-
-    # Now get the host path for the server directory
-    server_directory = await get_server_directory(server.id, host=True)
-    world_folder_path = os.path.join(server_directory, "world")
-    mod_folder_path = os.path.join(server_directory, "mods")
-
-    # Define image name, necessary port and volume mappings
-    image_name = server.loader + "-" + server.id
-    port_mapping = {"25565/tcp": server.port}
-    volume_mapping = {
-        world_folder_path: {
-            "bind": "/minecraft/world",
-            "propagation": "rshared",
-        },
-        mod_folder_path: {
-            "bind": "/minecraft/mods",
-            "propagation": "rshared",
-        },
-    }
-
-    # Run the Docker container
+    # Check if there is an existing container for the server
+    container_name = server.loader + "-" + server.id
     client = docker.from_env()
-    container = client.containers.run(
-        image_name,
-        detach=True,
-        name=image_name,
-        environment={"ALLOCATED_RAM": str(server.allocated_memory) + "M"},
-        ports=port_mapping,
-        volumes=volume_mapping,
-        stdin_open=True,
-    )
+    try:
+        container = client.containers.get(container_name)
+    except NotFound:
+        return await run_new_container(server)
+
+    # If there is already a container for the server, simply start it
+    container.start()
+    container.reload()
+
     return {"container_id": container.id}
 
 
