@@ -7,3 +7,6 @@
 # Storage
 /storage/*
 !/storage/README.md
+
+__pycache__
+.pytest_cache
