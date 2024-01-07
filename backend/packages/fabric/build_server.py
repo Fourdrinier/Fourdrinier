@@ -19,12 +19,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from backend.models import Playset
-from backend.packages.fabric.get_latest_mod_version import (
+from backend.packages.dependencies.get_mod_depencies import get_mod_dependencies
+from backend.packages.storage.get_server_directory import get_server_directory
+from backend.packages.versioning.get_latest_mod_version import (
     get_latest_mod_version,
     NoCompatibleVersionException,
 )
-from backend.packages.fabric.get_mod_depencies import get_mod_dependencies
-from backend.packages.storage.get_server_directory import get_server_directory
 
 
 async def build_server(server, db: AsyncSession):

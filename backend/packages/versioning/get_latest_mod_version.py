@@ -2,7 +2,7 @@ import httpx
 from fastapi import HTTPException
 
 
-async def get_latest_mod_version(mod_id, game_version):
+async def get_latest_mod_version(mod_id, loader, game_version):
     # Get the list of available versions of a mod
     async with httpx.AsyncClient() as client:
         response = await client.get(
@@ -16,7 +16,7 @@ async def get_latest_mod_version(mod_id, game_version):
             )
         latest_version = None
         for version in response.json():
-            if "fabric" in version["loaders"]:
+            if loader in version["loaders"]:
                 latest_version = version
                 break
         if latest_version is None:

@@ -1,7 +1,7 @@
 import httpx
 from fastapi import HTTPException
 
-from backend.packages.fabric.get_latest_mod_version import (
+from backend.packages.versioning.get_latest_mod_version import (
     get_latest_mod_version,
     NoCompatibleVersionException,
 )
