@@ -4,9 +4,6 @@
 # Secrets
 .env
 
-# Storage
-/storage/*
-!/storage/README.md
-
+# Python cacheing files
 __pycache__
 .pytest_cache
