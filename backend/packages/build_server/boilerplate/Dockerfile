@@ -12,7 +12,6 @@ ${MOD_DOWNLOADS}
 ${REQUIRED_DEPENDENCY_DOWNLOADS}
 
 # Download mods listed as optional dependencies of specified mods
-#${OPTIONAL_DEPENDENCY_DOWNLOADS}
 
 # Accept Minecraft's EULA
 RUN echo 'eula=${EULA}' > /minecraft/eula.txt
