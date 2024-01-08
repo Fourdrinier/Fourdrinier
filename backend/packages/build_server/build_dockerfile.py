@@ -67,7 +67,7 @@ async def build_dockerfile(server):
     tailored_dockerfile = (
         content.replace("${JAVA_VERSION}", str(java_requirement))
         .replace("${GAME_VERSION}", server["game_version"])
-        .replace("${LOADER}", server["loader"])
+        .replace("${LOADER}", server["loader"].title())
         .replace("${LOADER_URL}", jarfile_url)
         .replace("${MOD_DOWNLOADS}", download_mod_block)
         .replace("${REQUIRED_DEPENDENCY_DOWNLOADS}", download_req_dep_block)

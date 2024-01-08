@@ -1,7 +1,7 @@
 FROM openjdk:${JAVA_VERSION}
 WORKDIR /minecraft
 
-# Download the latest version of the ${LOADER} for Minecraft version ${GAME_VERSION}
+# Download the latest version of ${LOADER} for Minecraft version ${GAME_VERSION}
 ADD "${LOADER_URL}" /minecraft/server.jar
 
 
