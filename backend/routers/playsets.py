@@ -6,7 +6,6 @@ routers/playsets.py
 
 Endpoints allowing for interaction with user playsets
 """
-import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,9 +13,12 @@ from sqlalchemy.orm import selectinload
 
 from backend.database import get_db, generate_unique_id
 from backend.models import Playset, Mod, PlaysetResponse
+from backend.packages.modrinth.collections import get_collection
+from backend.packages.playsets.add_mods_to_playset import add_mods_to_playset
 from backend.schema import (
     PlaysetCreateSchema,
     AddModsToPlaysetSchema,
+    AddCollectionToPlaysetSchema,
     RenamePlaysetSchema,
 )
 
@@ -98,38 +100,32 @@ async def add_mod_to_playset(
     mod_data: AddModsToPlaysetSchema,
     db: AsyncSession = Depends(get_db),
 ):
-    # Inside your async function
+    playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
+    if playset is None:
+        raise HTTPException(status_code=404, detail="Playset not found")
+    mods = [
+        mod.mod_id for mod in mod_data.mods
+    ]  # Translate the mod list into one add_mods_to_playset() can read
+    playset = await add_mods_to_playset(mods, playset, db)
+
+    response = PlaysetResponse(
+        id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods]
+    )
+    return response
+
+
+@router.post("/{playset_id}/collection")
+async def add_mods_to_playset_via_collection(
+    playset_id: str,
+    collection: AddCollectionToPlaysetSchema,
+    db: AsyncSession = Depends(get_db),
+):
     playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
     if playset is None:
         raise HTTPException(status_code=404, detail="Playset not found")
 
-    for mod in mod_data.mods:
-        # Check if Mod exists in the Modrinth API
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"https://api.modrinth.com/v2/project/{mod.mod_id}"
-            )
-            if response.status_code != 200:
-                raise HTTPException(
-                    status_code=404, detail="Mod not found in Modrinth API"
-                )
-            else:
-                title = response.json().get("title")
-
-        # Check if the mod exists in the database
-        mod_entry = await db.get(Mod, mod.mod_id)
-        if mod_entry is None:
-            mod_entry = Mod(id=mod.mod_id, title=title)
-            db.add(mod_entry)
-            await db.commit()
-            await db.refresh(mod_entry)
-
-        if mod_entry not in playset.mods:
-            playset.mods.append(mod_entry)
-            await db.commit()
-            await db.refresh(playset)
-        else:
-            pass
+    collection = await get_collection(collection.collection_id)
+    playset = await add_mods_to_playset(collection["projects"], playset, db)
 
     response = PlaysetResponse(
         id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods]

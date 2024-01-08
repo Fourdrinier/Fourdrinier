@@ -16,6 +16,10 @@ class AddModsToPlaysetSchema(BaseModel):
     mods: List[ModSchema]
 
 
+class AddCollectionToPlaysetSchema(BaseModel):
+    collection_id: str
+
+
 class RenamePlaysetSchema(BaseModel):
     name: str
 
