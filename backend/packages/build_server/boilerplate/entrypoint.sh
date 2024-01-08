@@ -2,4 +2,4 @@
 
 allocated_ram=$1
 mv /downloads/* /minecraft/mods/
-java -Xmx$allocated_ram -jar /minecraft/fabric.jar nogui
+java -Xmx$allocated_ram -jar /minecraft/server.jar nogui

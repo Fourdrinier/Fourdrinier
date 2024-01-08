@@ -1,11 +1,9 @@
 FROM openjdk:${JAVA_VERSION}
 WORKDIR /minecraft
 
-# Download the latest version of Fabric for Minecraft version ${GAME_VERSION}
-ADD "${LOADER_URL}" /minecraft/fabric.jar
+# Download the latest version of the ${LOADER} for Minecraft version ${GAME_VERSION}
+ADD "${LOADER_URL}" /minecraft/server.jar
 
-# Download the Fabric API mod, as it is required for most Fabric mods
-ADD "${FABRIC_API_URL}" /downloads/
 
 # Download specified mods
 ${MOD_DOWNLOADS}
