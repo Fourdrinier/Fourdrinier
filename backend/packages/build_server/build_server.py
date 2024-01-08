@@ -1,10 +1,11 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from backend.models import Playset
+from backend.packages.build_server.build_docker_image import build_docker_image
+from backend.packages.build_server.build_dockerfile import build_dockerfile
 
 
-async def build_server(server, db: AsyncSession):
+async def build_server(server, db):
     server = {
         "id": server.id,
         "name": server.name,
@@ -20,6 +21,7 @@ async def build_server(server, db: AsyncSession):
         "eula": server.eula,
         "allocated_memory": server.allocated_memory,
     }
+
     await build_dockerfile(server)
     print("Dockerfile build successful")
     image_name = await build_docker_image(server)

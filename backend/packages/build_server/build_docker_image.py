@@ -1,43 +1,7 @@
-"""
-fabric/build_server.py
-
-@Author - Ethan Brown - ewbrowntech@gmail.com
-@Version - 5 JAN 23
-
-Build a server image given its settings
-"""
-
 import docker
 from fastapi import HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
-from backend.models import Playset
-from backend.packages.build_server.build_dockerfile import build_dockerfile
 from backend.packages.storage.get_server_directory import get_server_directory
-
-
-async def build_server(server, db: AsyncSession):
-    server = {
-        "id": server.id,
-        "name": server.name,
-        "game_version": server.game_version,
-        "loader": server.loader,
-        "playset": await db.get(
-            Playset,
-            server.playset.id,
-            populate_existing=True,
-            options=[selectinload(Playset.mods)],
-        ),
-        "port": server.port,
-        "eula": server.eula,
-        "allocated_memory": server.allocated_memory,
-    }
-    await build_dockerfile(server)
-    print("Dockerfile build successful")
-    image_name = await build_docker_image(server)
-
-    return {"image_name": image_name}
 
 
 async def build_docker_image(server):

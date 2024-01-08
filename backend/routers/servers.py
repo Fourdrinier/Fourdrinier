@@ -16,7 +16,7 @@ from sqlalchemy.orm import selectinload
 
 from backend.database import get_db, generate_unique_id
 from backend.models import Server, Playset, ServerResponse, PlaysetResponse
-from backend.packages.fabric.build_server import build_server as build_fabric_server
+from backend.packages.build_server.build_server import build_server as build_server_image
 from backend.packages.fabric.run_server import run_new_container
 from backend.schema import ServerCreateSchema, AddPlaysetToServerSchema
 
@@ -90,11 +90,8 @@ async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
     server = await db.get(Server, server_id, options=[selectinload(Server.playset)])
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
-    match server.loader:
-        case "fabric":
-            response = await build_fabric_server(server, db)
-
-    return response
+    response = await build_server_image(server, db)
+    return "Test"
 
 
 @router.post("/{server_id}/run")
