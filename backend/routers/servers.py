@@ -103,7 +103,7 @@ async def remove_playset_from_server(
 
 @router.post("/{server_id}/build")
 async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
-    server = await db.get(Server, server_id, options=[selectinload(Server.playset)])
+    server = await db.get(Server, server_id, options=[selectinload(Server.server_mods)])
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
     response = await build_server_image(server, db)
