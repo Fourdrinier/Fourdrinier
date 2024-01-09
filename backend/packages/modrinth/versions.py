@@ -25,7 +25,7 @@ async def get_latest_compatible_version(project_id, loader, game_version):
             latest_version = version
             break
     if latest_version is None:
-        raise NoCompatibleVersionException
+        raise NoCompatibleVersionException(project_id, loader, game_version)
     return latest_version
 
 

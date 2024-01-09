@@ -9,6 +9,7 @@ from backend.packages.build_server.get_latest_mod_versions import (
 from backend.packages.build_server.get_urls import get_version_urls
 from backend.packages.dependencies.build_dependency_tree import get_mod_dependencies
 from backend.packages.java.get_java_requirement import get_java_requirement
+from backend.packages.modrinth.projects import get_projects
 from backend.packages.storage.get_server_directory import get_server_directory
 
 
@@ -28,6 +29,15 @@ async def build_dockerfile(server):
     required_dependencies, optional_dependencies = await get_mod_dependencies(
         latest_mod_versions
     )
+
+    # Remove all project types but mods in optional dependencies
+    required_dependency_projects = await get_projects(required_dependencies)
+    optional_dependency_projects = await get_projects(optional_dependencies)
+
+    for project in optional_dependency_projects:
+        print(project)
+        if project["project_type"] == "resourcepack":
+            optional_dependencies.remove(project["id"])
 
     latest_req_dep_versions = await get_latest_mod_versions(
         required_dependencies, server["loader"], server["game_version"]

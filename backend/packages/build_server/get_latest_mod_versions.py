@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import HTTPException
 
 from backend.packages.modrinth.versions import (
@@ -17,4 +19,5 @@ async def get_latest_mod_versions(project_ids, loader, game_version):
             raise HTTPException(status_code=404, detail=str(e))
         latest_version = {"project_id": project_id, "version": version}
         latest_versions.append(latest_version)
+        await asyncio.sleep(0.2)
     return latest_versions
