@@ -15,11 +15,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from backend.database import get_db, generate_unique_id
-from backend.models import Server, Playset, ServerResponse, PlaysetResponse
+from backend.models import Server, Playset, ServerResponse, ServerModResponse
 from backend.packages.build_server.build_server import (
     build_server as build_server_image,
 )
 from backend.packages.fabric.run_server import run_new_container
+from backend.packages.playsets.add_playset_to_server import add_playset_to_server
 from backend.schema import ServerCreateSchema, AddPlaysetToServerSchema
 
 router = APIRouter()
@@ -44,32 +45,45 @@ async def create_server(
 
 
 @router.post("/{server_id}/playset")
-async def add_playset_to_server(
+async def add_playset_to_server_endpoint(
     server_id: str,
     playset_data: AddPlaysetToServerSchema,
     db: AsyncSession = Depends(get_db),
 ):
+    playset_id = playset_data.playset_id
     server = await db.get(Server, server_id)
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
-    playset = await db.get(
-        Playset, playset_data.playset_id, options=[selectinload(Playset.mods)]
-    )
+    playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
     if playset is None:
         raise HTTPException(status_code=404, detail="Playset not found")
-
     server.playset = playset
     await db.commit()
     await db.refresh(server)
 
+    server = await add_playset_to_server(server_id, playset_id, db)
+
+    result = await db.execute(
+        select(Server)
+        .options(selectinload(Server.server_mods))
+        .filter(Server.id == server.id)
+    )
+    server = result.scalars().first()
     response = ServerResponse(
         id=server.id,
         name=server.name,
         game_version=server.game_version,
         loader=server.loader,
-        playset=PlaysetResponse(
-            id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods]
-        ),
+        projects=[
+            ServerModResponse(
+                id=mod.project_id,
+                title=mod.title,
+                version=mod.version_id,
+                version_name=mod.version_name,
+                role=mod.role,
+            )
+            for mod in server.server_mods
+        ],
     )
     return response
 
