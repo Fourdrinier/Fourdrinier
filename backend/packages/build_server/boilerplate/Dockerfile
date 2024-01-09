@@ -22,6 +22,9 @@ EXPOSE 25565
 # Copy the entrypoint.txt script into the container
 COPY entrypoint.txt /entrypoint.sh
 
+# Ensure the entrypoint script is Unix-compatible (git will tailor it upon clone)
+RUN sed -i 's/\r$//' /entrypoint.sh
+
 # Make the entrypoint.txt script executable
 RUN chmod +x /entrypoint.sh
 
