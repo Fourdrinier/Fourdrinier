@@ -31,6 +31,7 @@ class Server(Base):
     game_version = Column(String, index=True, nullable=False)  # EX: "1.16.5"
     playset = relationship("Playset", back_populates="servers")
     playset_id = Column(String, ForeignKey("playset.id"))
+    server_mods = relationship("ServerMod", back_populates="server")
     port = Column(Integer, default=25565)
     eula = Column(Boolean, default=True)
     allocated_memory = Column(Integer, default=2048)
@@ -49,11 +50,22 @@ class Playset(Base):
 class Mod(Base):
     __tablename__ = "mod"
     id = Column(String, primary_key=True)
-    title = Column(String, unique=True)
+    title = Column(String)
     playsets = relationship(
         "Playset", secondary=mod_playset_association, back_populates="mods"
     )
 
+
+class ServerMod(Base):
+    __tablename__ = "server_mod"
+    id = Column(String, primary_key=True)
+    title = Column(String)
+    loader = Column(String)
+    project_id = Column(String)
+    project_type = Column(String)
+    version_id = Column(String)
+    url = Column(String)
+    server = relationship("Server", back_populates="server_mods")
 
 # Pydantic model for returning a playset with the list of all mods associated with it
 class PlaysetResponse(BaseModel):
