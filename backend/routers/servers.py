@@ -80,6 +80,7 @@ async def add_playset_to_server_endpoint(
                 title=mod.title,
                 version=mod.version_id,
                 version_name=mod.version_name,
+                role=mod.role,
             )
             for mod in server.server_mods
         ],

@@ -61,11 +61,11 @@ class ServerMod(Base):
     id = Column(String, primary_key=True)
     title = Column(String)
     project_id = Column(String)
-    project_type = Column(String)
     version_id = Column(String)
     version_name = Column(String)
     supported_versions = Column(String)
     url = Column(String)
+    role = Column(String)
     server_id = Column(String, ForeignKey("server.id"))
     server = relationship("Server", back_populates="server_mods")
 
@@ -82,6 +82,7 @@ class ServerModResponse(BaseModel):
     title: str
     version: str
     version_name: str
+    role: str
 
 
 class ServerResponse(BaseModel):
