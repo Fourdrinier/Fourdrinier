@@ -5,8 +5,8 @@ from backend.packages.storage.get_server_directory import get_server_directory
 
 
 async def build_docker_image(server):
-    server_directory = await get_server_directory(server["id"])
-    image_name = "fabric-" + server["id"]
+    server_directory = await get_server_directory(server.id)
+    image_name = "fabric-" + server.id
     # Create a Docker client
     with docker.APIClient(base_url="unix://var/run/docker.sock") as low_level_client:
         # Stream the build output
