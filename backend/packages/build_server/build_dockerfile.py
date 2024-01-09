@@ -35,7 +35,6 @@ async def build_dockerfile(server):
     optional_dependency_projects = await get_projects(optional_dependencies)
 
     for project in optional_dependency_projects:
-        print(project)
         if project["project_type"] == "resourcepack":
             optional_dependencies.remove(project["id"])
 
