@@ -13,7 +13,10 @@ from sqlalchemy.orm import selectinload
 
 from backend.database import get_db, generate_unique_id
 from backend.models import Playset, Mod, PlaysetResponse
-from backend.packages.modrinth.collections import get_collection
+from backend.packages.modrinth.collections import (
+    get_collection,
+    CollectionNotFoundException,
+)
 from backend.packages.playsets.add_mods_to_playset import add_mods_to_playset
 from backend.schema import (
     PlaysetCreateSchema,
@@ -36,7 +39,7 @@ async def list_playsets(db: AsyncSession = Depends(get_db)):
 async def create_playset(
     playset_data: PlaysetCreateSchema, db: AsyncSession = Depends(get_db)
 ):
-    new_playset = Playset(id=generate_unique_id(), **playset_data.dict())
+    new_playset = Playset(id=generate_unique_id(), **playset_data.model_dump())
 
     # Add to the database
     db.add(new_playset)
@@ -44,6 +47,38 @@ async def create_playset(
     await db.refresh(new_playset)
 
     return new_playset
+
+
+@router.post("/collection")
+async def create_playset_from_collection(
+    collection: AddCollectionToPlaysetSchema, db: AsyncSession = Depends(get_db)
+):
+    # Get the collection data from the Modrinth API
+    try:
+        collection = await get_collection(collection.collection_id)
+    except CollectionNotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    # Create a new playset using the collection metadata
+    playset = Playset(id=generate_unique_id(), name=collection["name"])
+
+    db.add(playset)
+    await db.commit()
+    await db.refresh(playset)
+
+    # Add the projects from the collection to the playset
+    playset = await add_mods_to_playset(
+        collection["projects"], playset.id, db, verify=False
+    )
+
+    stmt = select(Playset).options(selectinload(Playset.mods)).filter_by(id=playset.id)
+    result = await db.execute(stmt)
+    playset = result.scalar_one()
+
+    response = PlaysetResponse(
+        id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods]
+    )
+    return response
 
 
 @router.get("/{playset_id}")
@@ -100,13 +135,10 @@ async def add_mod_to_playset(
     mod_data: AddModsToPlaysetSchema,
     db: AsyncSession = Depends(get_db),
 ):
-    playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
-    if playset is None:
-        raise HTTPException(status_code=404, detail="Playset not found")
     mods = [
         mod.mod_id for mod in mod_data.mods
     ]  # Translate the mod list into one add_mods_to_playset() can read
-    playset = await add_mods_to_playset(mods, playset, db)
+    playset = await add_mods_to_playset(mods, playset_id, db)
 
     response = PlaysetResponse(
         id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods]
@@ -120,12 +152,8 @@ async def add_mods_to_playset_via_collection(
     collection: AddCollectionToPlaysetSchema,
     db: AsyncSession = Depends(get_db),
 ):
-    playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
-    if playset is None:
-        raise HTTPException(status_code=404, detail="Playset not found")
-
     collection = await get_collection(collection.collection_id)
-    playset = await add_mods_to_playset(collection["projects"], playset, db)
+    playset = await add_mods_to_playset(collection["projects"], playset_id, db)
 
     response = PlaysetResponse(
         id=playset.id, name=playset.name, mods=[mod.id for mod in playset.mods]

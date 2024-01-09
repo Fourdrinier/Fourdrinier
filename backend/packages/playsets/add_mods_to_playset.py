@@ -1,13 +1,21 @@
 import httpx
 from fastapi import APIRouter, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from backend.models import Mod
+from backend.models import Mod, Playset
 
 router = APIRouter()
 
 
-async def add_mods_to_playset(mods, playset, db: AsyncSession):
+async def add_mods_to_playset(mods, playset_id, db: AsyncSession, verify=True):
+    stmt = select(Playset).options(selectinload(Playset.mods)).filter_by(id=playset_id)
+    result = await db.execute(stmt)
+    playset = result.scalar_one()
+    if playset is None:
+        raise HTTPException(status_code=404, detail="Playset not found")
+
     for project_id in mods:
         # Check if Mod exists in the Modrinth API
         async with httpx.AsyncClient() as client:
@@ -32,9 +40,9 @@ async def add_mods_to_playset(mods, playset, db: AsyncSession):
 
         if mod_entry not in playset.mods:
             playset.mods.append(mod_entry)
-            await db.commit()
-            await db.refresh(playset)
         else:
             pass
+    await db.commit()
+    await db.refresh(playset)
 
     return playset
