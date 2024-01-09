@@ -60,12 +60,15 @@ class ServerMod(Base):
     __tablename__ = "server_mod"
     id = Column(String, primary_key=True)
     title = Column(String)
-    loader = Column(String)
     project_id = Column(String)
     project_type = Column(String)
     version_id = Column(String)
+    version_name = Column(String)
+    supported_versions = Column(String)
     url = Column(String)
+    server_id = Column(String, ForeignKey("server.id"))
     server = relationship("Server", back_populates="server_mods")
+
 
 # Pydantic model for returning a playset with the list of all mods associated with it
 class PlaysetResponse(BaseModel):
@@ -74,9 +77,16 @@ class PlaysetResponse(BaseModel):
     mods: List[str]  # List of mod IDs
 
 
+class ServerModResponse(BaseModel):
+    id: str
+    title: str
+    version: str
+    version_name: str
+
+
 class ServerResponse(BaseModel):
     id: str
     name: str
     game_version: str
     loader: str
-    playset: PlaysetResponse
+    projects: List[ServerModResponse]

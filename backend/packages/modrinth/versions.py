@@ -1,4 +1,5 @@
 import httpx
+from fastapi import HTTPException
 
 
 async def get_versions(project_id, game_versions):
@@ -8,9 +9,13 @@ async def get_versions(project_id, game_versions):
         "[" + ", ".join(f'"{game_version}"' for game_version in game_versions) + "]"
     )
     async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"https://api.modrinth.com/v2/project/{project_id}/version?game_versions={game_versions_string}"
-        )
+        try:
+            request = f"https://api.modrinth.com/v2/project/{project_id}/version?game_versions={game_versions_string}"
+            response = await client.get(request)
+        except httpx.TimeoutException:
+            raise HTTPException(
+                status_code=500, detail=f"The following request timed out: {request}"
+            )
         if response.status_code != 200:
             raise NoVersionFoundException(project_id, game_versions)
     versions = response.json()
