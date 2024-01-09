@@ -94,10 +94,10 @@ async def build_dockerfile(server):
     with open(os.path.join(server_directory, "Dockerfile"), "w") as dockerfile:
         dockerfile.write(tailored_dockerfile)
 
-    # Copy over the entrypoint script
+    # Copy over the entrypoint.txt script
     shutil.copy(
-        os.path.join(boilerplate_directory, "entrypoint.sh"),
-        os.path.join(server_directory, "entrypoint.sh"),
+        os.path.join(boilerplate_directory, "entrypoint.txt"),
+        os.path.join(server_directory, "entrypoint.txt"),
     )
 
     # Ensure a world and mod directory is present

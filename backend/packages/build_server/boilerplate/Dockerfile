@@ -19,10 +19,10 @@ RUN echo 'eula=${EULA}' > /minecraft/eula.txt
 # Expose the server's port
 EXPOSE 25565
 
-# Copy the entrypoint script into the container
-COPY entrypoint.sh /entrypoint.sh
+# Copy the entrypoint.txt script into the container
+COPY entrypoint.txt /entrypoint.sh
 
-# Make the entrypoint script executable
+# Make the entrypoint.txt script executable
 RUN chmod +x /entrypoint.sh
 
 # Command to start the Minecraft server
