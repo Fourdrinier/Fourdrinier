@@ -57,9 +57,6 @@ async def add_playset_to_server_endpoint(
     playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
     if playset is None:
         raise HTTPException(status_code=404, detail="Playset not found")
-    server.playset = playset
-    await db.commit()
-    await db.refresh(server)
 
     server = await add_playset_to_server(server_id, playset_id, db)
 
@@ -69,6 +66,7 @@ async def add_playset_to_server_endpoint(
         .filter(Server.id == server.id)
     )
     server = result.scalars().first()
+
     response = ServerResponse(
         id=server.id,
         name=server.name,
@@ -88,19 +86,6 @@ async def add_playset_to_server_endpoint(
     return response
 
 
-@router.delete("/{server_id}/playset")
-async def remove_playset_from_server(
-    server_id: str, db: AsyncSession = Depends(get_db)
-):
-    server = await db.get(Server, server_id)
-    if server is None:
-        raise HTTPException(status_code=404, detail="Server not found")
-    server.playset_id = None
-    await db.commit()
-    await db.refresh(server)
-    return server
-
-
 @router.post("/{server_id}/build")
 async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
     server = await db.get(Server, server_id, options=[selectinload(Server.server_mods)])
@@ -112,7 +97,7 @@ async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.post("/{server_id}/run")
 async def run_server(server_id: str, db: AsyncSession = Depends(get_db)):
-    server = await db.get(Server, server_id, options=[selectinload(Server.playset)])
+    server = await db.get(Server, server_id)
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
 
@@ -133,7 +118,7 @@ async def run_server(server_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.post("/{server_id}/stop")
 async def stop_server(server_id: str, db: AsyncSession = Depends(get_db)):
-    server = await db.get(Server, server_id, options=[selectinload(Server.playset)])
+    server = await db.get(Server, server_id)
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
 

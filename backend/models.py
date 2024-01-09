@@ -29,8 +29,6 @@ class Server(Base):
     name = Column(String, index=True, nullable=False)  # EX: "My Paper Server"
     loader = Column(String, index=True, nullable=False)  # EX: "paper"
     game_version = Column(String, index=True, nullable=False)  # EX: "1.16.5"
-    playset = relationship("Playset", back_populates="servers")
-    playset_id = Column(String, ForeignKey("playset.id"))
     server_mods = relationship("ServerMod", back_populates="server")
     port = Column(Integer, default=25565)
     eula = Column(Boolean, default=True)
@@ -44,7 +42,6 @@ class Playset(Base):
     mods = relationship(
         "Mod", secondary=mod_playset_association, back_populates="playsets"
     )
-    servers = relationship("Server", back_populates="playset")
 
 
 class Mod(Base):
