@@ -1,9 +1,11 @@
+import json
 import os
 import shutil
 from pathlib import Path
 
 from backend.packages.build_server.get_jarfile_url import get_jarfile_url
 from backend.packages.java.get_java_requirement import get_java_requirement
+from backend.packages.server_properties.generate_properties import generate_properties
 from backend.packages.storage.get_server_directory import get_server_directory
 
 
@@ -56,6 +58,11 @@ async def build_dockerfile(server):
         .replace("${REQUIRED_DEPENDENCY_DOWNLOADS}", download_req_dep_block)
         .replace("${OPTIONAL_DEPENDENCY_DOWNLOADS}", download_opt_dep_block)
         .replace("${EULA}", str(server.eula).lower())
+        .replace(
+            "${SERVER_PROPERTIES}",
+            '"' + await generate_properties(server) + '"',
+        )
+        .replace("${OPS}", '"' + str(json.loads(server.ops)["ops"]) + '"')
         .replace("${ALLOCATED_RAM}", str(server.allocated_memory) + "M")
     )
 
