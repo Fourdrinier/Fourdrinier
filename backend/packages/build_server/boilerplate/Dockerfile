@@ -16,6 +16,12 @@ ${REQUIRED_DEPENDENCY_DOWNLOADS}
 # Accept Minecraft's EULA
 RUN echo 'eula=${EULA}' > /minecraft/eula.txt
 
+# Add properties to server.properties
+RUN echo -e ${SERVER_PROPERTIES} > /minecraft/server.properties
+
+# Add ops to ops.json
+RUN echo ${OPS} > /minecraft/ops.json
+
 # Expose the server's port
 EXPOSE 25565
 
