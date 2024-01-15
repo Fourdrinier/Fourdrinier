@@ -21,9 +21,12 @@ from backend.packages.build_server.build_server import (
 )
 from backend.packages.fabric.run_server import run_new_container
 from backend.packages.playsets.add_playset_to_server import add_playset_to_server
+# Import server routers
+from backend.routers.servers.settings.server_settings import server_settings_router
 from backend.schema import ServerCreateSchema, AddPlaysetToServerSchema
 
 router = APIRouter()
+router.include_router(server_settings_router, prefix="/{server_id}/settings")
 
 
 @router.get("/")
