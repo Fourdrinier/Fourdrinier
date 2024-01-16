@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -30,10 +32,19 @@ async def update_server_settings(
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
 
+    # Update ops by itself, as it is serialized to a JSON string
+    if settings_data.ops is not None:
+        ops_dict = {"ops": settings_data.ops}
+        server.settings.ops = json.dumps(ops_dict)
+        settings_data.ops = (
+            None  # Set this value to None such that it is not iterated over below
+        )
+
     # Update any fields specified in the request
     for var, value in vars(settings_data).items():
         if value is not None:
             setattr(server.settings, var, value)
+
     await db.commit()
     await db.refresh(server.settings)
     return server.settings
