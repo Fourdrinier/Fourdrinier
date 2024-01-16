@@ -26,10 +26,22 @@ mod_playset_association = Table(
 class Server(Base):
     __tablename__ = "server"
     id = Column(String, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)  # EX: "My Paper Server"
+    name = Column(
+        String,
+        index=True,
+        nullable=False,
+    )  # EX: "My Paper Server"
+    server_mods = relationship("ServerMod", back_populates="server")
+    settings = relationship("ServerSettings", back_populates="server", uselist=False)
+
+
+class ServerSettings(Base):
+    __tablename__ = "server_settings"
+    id = Column(String, primary_key=True, index=True)
+    server = relationship("Server", back_populates="settings")
+    server_id = Column(String, ForeignKey("server.id"), unique=True)
     loader = Column(String, index=True, nullable=False)  # EX: "paper"
     game_version = Column(String, index=True, nullable=False)  # EX: "1.16.5"
-    server_mods = relationship("ServerMod", back_populates="server")
     port = Column(Integer, default=25565)
     eula = Column(Boolean, default=True)
     allocated_memory = Column(Integer, default=2048)

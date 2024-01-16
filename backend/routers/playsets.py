@@ -18,7 +18,7 @@ from backend.packages.modrinth.collections import (
     CollectionNotFoundException,
 )
 from backend.packages.playsets.add_mods_to_playset import add_mods_to_playset
-from backend.schema import (
+from backend.schema.schema import (
     PlaysetCreateSchema,
     AddModsToPlaysetSchema,
     AddCollectionToPlaysetSchema,

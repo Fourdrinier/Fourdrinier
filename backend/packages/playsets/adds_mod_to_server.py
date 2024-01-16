@@ -15,7 +15,10 @@ async def add_projects_to_server(
     server_id, project_ids, db: AsyncSession, role="requested"
 ):
     stmt = (
-        select(Server).options(selectinload(Server.server_mods)).filter_by(id=server_id)
+        select(Server)
+        .options(selectinload(Server.server_mods))
+        .options(selectinload(Server.settings))
+        .filter_by(id=server_id)
     )
     result = await db.execute(stmt)
     server = result.scalar_one()
@@ -37,7 +40,7 @@ async def add_projects_to_server(
     # Add the new projects to the server
     for project in new_projects:
         version = await get_latest_compatible_version(
-            project["id"], server.loader, server.game_version
+            project["id"], server.settings.loader, server.settings.game_version
         )
         supported_game_versions = [
             game_version for game_version in version["game_versions"]

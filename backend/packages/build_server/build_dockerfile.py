@@ -10,8 +10,12 @@ from backend.packages.storage.get_server_directory import get_server_directory
 
 
 async def build_dockerfile(server):
-    java_requirement = await get_java_requirement(server.loader, server.game_version)
-    jarfile_url = await get_jarfile_url(server.loader, server.game_version)
+    java_requirement = await get_java_requirement(
+        server.settings.loader, server.settings.game_version
+    )
+    jarfile_url = await get_jarfile_url(
+        server.settings.loader, server.settings.game_version
+    )
 
     # Compile urls for projects
     mod_urls = []
@@ -51,19 +55,19 @@ async def build_dockerfile(server):
     # Tailor the boilerplate Dockerfile to the server
     tailored_dockerfile = (
         content.replace("${JAVA_VERSION}", str(java_requirement))
-        .replace("${GAME_VERSION}", server.game_version)
-        .replace("${LOADER}", server.loader.title())
+        .replace("${GAME_VERSION}", server.settings.game_version)
+        .replace("${LOADER}", server.settings.loader.title())
         .replace("${LOADER_URL}", jarfile_url)
         .replace("${MOD_DOWNLOADS}", download_mod_block)
         .replace("${REQUIRED_DEPENDENCY_DOWNLOADS}", download_req_dep_block)
         .replace("${OPTIONAL_DEPENDENCY_DOWNLOADS}", download_opt_dep_block)
-        .replace("${EULA}", str(server.eula).lower())
+        .replace("${EULA}", str(server.settings.eula).lower())
         .replace(
             "${SERVER_PROPERTIES}",
-            '"' + await generate_properties(server) + '"',
+            '"' + await generate_properties(server.settings) + '"',
         )
-        .replace("${OPS}", '"' + str(json.loads(server.ops)["ops"]) + '"')
-        .replace("${ALLOCATED_RAM}", str(server.allocated_memory) + "M")
+        .replace("${OPS}", '"' + str(json.loads(server.settings.ops)["ops"]) + '"')
+        .replace("${ALLOCATED_RAM}", str(server.settings.allocated_memory) + "M")
     )
 
     # Get the path to the server's storage directory
