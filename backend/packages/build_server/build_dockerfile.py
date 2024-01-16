@@ -1,54 +1,34 @@
+import json
 import os
 import shutil
 from pathlib import Path
 
 from backend.packages.build_server.get_jarfile_url import get_jarfile_url
-from backend.packages.build_server.get_latest_mod_versions import (
-    get_latest_mod_versions,
-)
-from backend.packages.build_server.get_urls import get_version_urls
-from backend.packages.dependencies.build_dependency_tree import get_mod_dependencies
 from backend.packages.java.get_java_requirement import get_java_requirement
-from backend.packages.modrinth.projects import get_projects
+from backend.packages.server_properties.generate_properties import generate_properties
 from backend.packages.storage.get_server_directory import get_server_directory
 
 
 async def build_dockerfile(server):
     java_requirement = await get_java_requirement(
-        server["loader"], server["game_version"]
+        server.settings.loader, server.settings.game_version
     )
-    jarfile_url = await get_jarfile_url(server["loader"], server["game_version"])
-
-    # For each mod, get the latest version
-    latest_mod_versions = await get_latest_mod_versions(
-        [mod.id for mod in server["playset"].mods],
-        server["loader"],
-        server["game_version"],
+    jarfile_url = await get_jarfile_url(
+        server.settings.loader, server.settings.game_version
     )
 
-    required_dependencies, optional_dependencies = await get_mod_dependencies(
-        latest_mod_versions
-    )
-
-    # Remove all project types but mods in optional dependencies
-    required_dependency_projects = await get_projects(required_dependencies)
-    optional_dependency_projects = await get_projects(optional_dependencies)
-
-    for project in optional_dependency_projects:
-        if project["project_type"] == "resourcepack":
-            optional_dependencies.remove(project["id"])
-
-    latest_req_dep_versions = await get_latest_mod_versions(
-        required_dependencies, server["loader"], server["game_version"]
-    )
-
-    latest_opt_dep_versions = await get_latest_mod_versions(
-        optional_dependencies, server["loader"], server["game_version"]
-    )
-
-    mod_urls = await get_version_urls(latest_mod_versions)
-    required_dependency_urls = await get_version_urls(latest_req_dep_versions)
-    optional_dependency_urls = await get_version_urls(latest_opt_dep_versions)
+    # Compile urls for projects
+    mod_urls = []
+    required_dependency_urls = []
+    optional_dependency_urls = []
+    for mod in server.server_mods:
+        match mod.role:
+            case "requested":
+                mod_urls.append(mod.url)
+            case "required_dependency":
+                required_dependency_urls.append(mod.url)
+            case "optional_dependency":
+                optional_dependency_urls.append(mod.url)
 
     # Create command block for downloading specified mods
     download_mod_block = ""
@@ -75,18 +55,23 @@ async def build_dockerfile(server):
     # Tailor the boilerplate Dockerfile to the server
     tailored_dockerfile = (
         content.replace("${JAVA_VERSION}", str(java_requirement))
-        .replace("${GAME_VERSION}", server["game_version"])
-        .replace("${LOADER}", server["loader"].title())
+        .replace("${GAME_VERSION}", server.settings.game_version)
+        .replace("${LOADER}", server.settings.loader.title())
         .replace("${LOADER_URL}", jarfile_url)
         .replace("${MOD_DOWNLOADS}", download_mod_block)
         .replace("${REQUIRED_DEPENDENCY_DOWNLOADS}", download_req_dep_block)
         .replace("${OPTIONAL_DEPENDENCY_DOWNLOADS}", download_opt_dep_block)
-        .replace("${EULA}", str(server["eula"]).lower())
-        .replace("${ALLOCATED_RAM}", str(server["allocated_memory"]) + "M")
+        .replace("${EULA}", str(server.settings.eula).lower())
+        .replace(
+            "${SERVER_PROPERTIES}",
+            '"' + await generate_properties(server.settings) + '"',
+        )
+        .replace("${OPS}", '"' + str(json.loads(server.settings.ops)["ops"]) + '"')
+        .replace("${ALLOCATED_RAM}", str(server.settings.allocated_memory) + "M")
     )
 
     # Get the path to the server's storage directory
-    server_directory = await get_server_directory(server["id"])
+    server_directory = await get_server_directory(server.id)
     Path(server_directory).mkdir(parents=True, exist_ok=True)
 
     # Write the Dockerfile
