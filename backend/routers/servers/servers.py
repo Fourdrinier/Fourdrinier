@@ -2,7 +2,6 @@
 routers/distributions.py
 
 @Author - Ethan Brown - ewbrowntech@gmail.com
-@Version - 05 JAN 24
 
 Endpoints allowing for interaction with hosted files
 """
@@ -15,7 +14,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from backend.database import get_db, generate_unique_id
-from backend.models import Server, Playset, ServerResponse, ServerModResponse
+from backend.models import (
+    Server,
+    ServerSettings,
+    Playset,
+    ServerResponse,
+    ServerModResponse,
+)
 from backend.packages.build_server.build_server import (
     build_server as build_server_image,
 )
@@ -26,7 +31,6 @@ from backend.routers.servers.settings.server_settings import server_settings_rou
 from backend.schema import ServerCreateSchema, AddPlaysetToServerSchema
 
 router = APIRouter()
-router.include_router(server_settings_router, prefix="/{server_id}/settings")
 
 
 @router.get("/")
@@ -40,10 +44,20 @@ async def list_servers(db: AsyncSession = Depends(get_db)):
 async def create_server(
     server_data: ServerCreateSchema, db: AsyncSession = Depends(get_db)
 ):
-    new_server = Server(id=generate_unique_id(), **server_data.model_dump())
+    new_server = Server(id=generate_unique_id(), name=server_data.name)
+    server_data = server_data.model_dump()
+    server_data.pop("name", None)  # Example of removing a non-Profile field
+    new_server_settings = ServerSettings(
+        id=generate_unique_id(), server=new_server, **server_data
+    )
+
     db.add(new_server)
+    db.add(new_server_settings)
     await db.commit()
+
     await db.refresh(new_server)
+    await db.refresh(new_server_settings)
+
     return new_server
 
 
@@ -54,7 +68,7 @@ async def add_playset_to_server_endpoint(
     db: AsyncSession = Depends(get_db),
 ):
     playset_id = playset_data.playset_id
-    server = await db.get(Server, server_id)
+    server = await db.get(Server, server_id, options=[selectinload(Server.settings)])
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
     playset = await db.get(Playset, playset_id, options=[selectinload(Playset.mods)])
@@ -73,8 +87,8 @@ async def add_playset_to_server_endpoint(
     response = ServerResponse(
         id=server.id,
         name=server.name,
-        game_version=server.game_version,
-        loader=server.loader,
+        game_version=server.settings.game_version,
+        loader=server.settings.loader,
         projects=[
             ServerModResponse(
                 id=mod.project_id,
@@ -91,7 +105,11 @@ async def add_playset_to_server_endpoint(
 
 @router.post("/{server_id}/build")
 async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
-    server = await db.get(Server, server_id, options=[selectinload(Server.server_mods)])
+    server = await db.get(
+        Server,
+        server_id,
+        options=[selectinload(Server.server_mods), selectinload(Server.settings)],
+    )
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
     response = await build_server_image(server, db)
@@ -100,12 +118,12 @@ async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.post("/{server_id}/run")
 async def run_server(server_id: str, db: AsyncSession = Depends(get_db)):
-    server = await db.get(Server, server_id)
+    server = await db.get(Server, server_id, options=[selectinload(Server.settings)])
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
 
     # Check if there is an existing container for the server
-    container_name = server.loader + "-" + server.id
+    container_name = server.settings.loader + "-" + server.id
     client = docker.from_env()
     try:
         container = client.containers.get(container_name)
@@ -126,7 +144,7 @@ async def stop_server(server_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Server not found")
 
     # Get the container
-    container_name = server.loader + "-" + server.id
+    container_name = server.settings.loader + "-" + server.id
     client = docker.from_env()
     try:
         container = client.containers.get(container_name)
@@ -160,3 +178,6 @@ async def stop_server(server_id: str, db: AsyncSession = Depends(get_db)):
                 status_code=500,
                 detail=f"Unable to determine status of {container_name}. Try rebuilding the server.",
             )
+
+
+router.include_router(server_settings_router, prefix="/{server_id}/settings")

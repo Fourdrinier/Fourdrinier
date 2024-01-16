@@ -20,8 +20,8 @@ async def run_new_container(server):
     mod_folder_path = os.path.join(server_directory, "mods")
 
     # Define image name, necessary port and volume mappings
-    image_name = server.loader + "-" + server.id
-    port_mapping = {"25565/tcp": server.port}
+    image_name = server.settings.loader + "-" + server.id
+    port_mapping = {"25565/tcp": server.settings.port}
     volume_mapping = {
         world_folder_path: {
             "bind": "/minecraft/world",
@@ -39,7 +39,7 @@ async def run_new_container(server):
         image_name,
         detach=True,
         name=image_name,
-        environment={"ALLOCATED_RAM": str(server.allocated_memory) + "M"},
+        environment={"ALLOCATED_RAM": str(server.settings.allocated_memory) + "M"},
         ports=port_mapping,
         volumes=volume_mapping,
         stdin_open=True,
