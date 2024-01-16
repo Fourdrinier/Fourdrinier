@@ -28,7 +28,7 @@ from backend.packages.fabric.run_server import run_new_container
 from backend.packages.playsets.add_playset_to_server import add_playset_to_server
 # Import server routers
 from backend.routers.servers.settings.server_settings import server_settings_router
-from backend.schema import ServerCreateSchema, AddPlaysetToServerSchema
+from backend.schema.schema import ServerCreateSchema, AddPlaysetToServerSchema
 
 router = APIRouter()
 

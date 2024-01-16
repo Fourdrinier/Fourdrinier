@@ -4,7 +4,7 @@ from sqlalchemy.orm import selectinload
 
 from backend.database import get_db
 from backend.models import Server
-from backend.schema import UpdateServerSettingsSchema
+from backend.schema.server_settings import UpdateServerSettingsSchema
 
 # Import server routers
 
