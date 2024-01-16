@@ -1,5 +1,6 @@
 # IDE Settings Files
 .idea/
+.vscode/
 
 # Secrets
 .env
