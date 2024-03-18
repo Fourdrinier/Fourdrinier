@@ -56,5 +56,5 @@ our servers.
 1) Open a terminal within the root directory of Fourdrinier
 2) Run the following:
 
-        docker-compose down
+        docker-compose down -v
 
