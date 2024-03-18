@@ -49,7 +49,7 @@ our servers.
 1) Open a terminal within the root directory of Fourdrinier
 2) Run the following:
 
-        docker-compose up --build
+        docker-compose up
 
 ## Stopping Fourdrinier
 
