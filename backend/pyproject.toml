@@ -1,23 +1,23 @@
 [tool.poetry]
-name = "backend"
+name = "app"
 version = "0.1.0"
 description = ""
-authors = ["Ethan Brown <ewbrowntech@gmail.com>"]
-license = "MIT"
-readme = "README.md"
+authors = ["Ethan Brown <ethan@ewbrowntech.com>"]
+license = "GPLv3"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.108.0"
-uvicorn = {extras = ["standard"], version = "^0.25.0"}
-python-multipart = "^0.0.6"
+fastapi = "^0.110.0"
+uvicorn = "^0.28.0"
+sqlalchemy = "^2.0.28"
+alembic = "^1.13.1"
 asyncpg = "^0.29.0"
-sqlalchemy = "^2.0.24"
-httpx = "^0.26.0"
-docker = "^7.0.0"
-pytest = "^7.4.4"
-pytest-asyncio = "^0.23.3"
 
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.3.0"
+pytest = "^8.1.1"
+pytest-asyncio = "^0.23.5.post1"
 
 [build-system]
 requires = ["poetry-core"]
