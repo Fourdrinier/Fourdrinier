@@ -12,8 +12,8 @@ COPY pyproject.toml poetry.lock* /backend/
 RUN poetry config virtualenvs.create false \
     && poetry install --no-dev
 
-# Copy the rest of the application code to the container
-COPY . .
+# Copy the alembic.ini file to the container
+COPY alembic.ini /backend/alembic.ini
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
@@ -22,4 +22,4 @@ EXPOSE 8000
 COPY ./app /backend/app
 
 # Start the FastAPI app
-CMD ["uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD python -m alembic upgrade head && python -m uvicorn app.app:app --host 0.0.0.0 --port 8000

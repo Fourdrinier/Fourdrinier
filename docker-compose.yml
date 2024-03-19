@@ -13,10 +13,10 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
 
-  db:
+  postgres:
     image: postgres:latest
     volumes:
       - postgres_data:/var/lib/postgresql/data
