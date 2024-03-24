@@ -1,0 +1,16 @@
+### generate_registration_token()
+- **[000] test_generate_registration_token_000_nominal_first_time_startup**
+    - Conditions: No registration token file exists yet
+    - Result: Registration token return and file created
+- **[001] test_generate_registration_token_001_nominal_existing_token_file**
+    - Conditions: Token file exists
+    - Result: Token file overwritten and token returned
+- **[002] test_generate_registration_token_001_anomalous**
+    - Conditions: The given directory does not exist
+    - Result: FileNotFoundError
+- **[003] test_generate_registration_token_001_anomalous**
+    - Conditions: The given path is a file, not a directory
+    - Result: NotADirectoryError
+- **[004] test_generate_registration_token_001_anomalous**
+    - Conditions: Insufficient permissions
+    - Result: PermissionError("Fourdrinier does not have permissions to write to the given directory")

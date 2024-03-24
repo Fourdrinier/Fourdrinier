@@ -10,6 +10,8 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
+import os
+import shutil
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
@@ -20,6 +22,19 @@ from app.db.session import get_db
 from app.app import app
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
+TEST_STORAGE = "/tmp/fourdrinier"
+
+
+@pytest_asyncio.fixture(scope="function", autouse=True)
+async def test_storage():
+    """
+    Create a temporary storage directory for use in testing
+    """
+    try:
+        os.makedirs(TEST_STORAGE, exist_ok=True)
+        yield TEST_STORAGE
+    finally:
+        shutil.rmtree(TEST_STORAGE)
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
