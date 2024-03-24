@@ -1,3 +1,15 @@
+"""
+session.py
+
+@Author: Ethan Brown
+
+Database session management for the Fourdrinier project
+
+Copyright (C) 2024 by Ethan Brown
+All rights reserved. This file is part of the Fourdrinier project and is released under
+the GPLv3 License. See the LICENSE file for more details.
+"""
+
 import asyncpg
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
