@@ -1,5 +1,5 @@
 """
-test_servers.py
+test_list_servers.py
 
 @Author: Ethan Brown - ethan@ewbrowntech.com
 
