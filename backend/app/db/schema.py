@@ -11,6 +11,7 @@ the GPLv3 License. See the LICENSE file for more details.
 """
 
 from pydantic import BaseModel, Field
+from typing import Optional
 
 
 class ServerCreate(BaseModel):
@@ -25,4 +26,25 @@ class ServerCreate(BaseModel):
     )
     game_version: str = Field(
         ..., pattern=r"^\d+\.\d+\.\d+$", title="Game Version", example="1.17.1"
+    )
+
+
+class UserCreate(BaseModel):
+    username: str = Field(
+        default="user",
+        title="Username",
+        description="The username of the user",
+        example="user",
+    )
+    password: str = Field(
+        default="password",
+        title="Password",
+        description="The password of the user",
+        example="password",
+    )
+    email: Optional[str] = Field(
+        None,
+        title="Email",
+        description="The email of the user",
+        example="example@example.com",
     )
