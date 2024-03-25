@@ -5,12 +5,12 @@
 - **[001] test_generate_registration_token_001_nominal_existing_token_file**
     - Conditions: Token file exists
     - Result: Token file overwritten and token returned
-- **[002] test_generate_registration_token_001_anomalous**
-    - Conditions: The given directory does not exist
+- **[002] test_generate_registration_token_002_anomalous_path_is_a_dir**
+    - Conditions: The given path is a directory, not a file
+    - Result: IsADirectoryError
+- **[003] test_generate_registration_token_003_anomalous_nonexistent_file**
+    - Conditions: The given filepath does not exist
     - Result: FileNotFoundError
-- **[003] test_generate_registration_token_001_anomalous**
-    - Conditions: The given path is a file, not a directory
-    - Result: NotADirectoryError
-- **[004] test_generate_registration_token_001_anomalous**
+- **[004] test_generate_registration_token_004_anomalous_insufficient_permissions**
     - Conditions: Insufficient permissions
-    - Result: PermissionError("Fourdrinier does not have permissions to write to the given directory")
+    - Result: PermissionError - [Errno 13] Permission denied: '[path]'

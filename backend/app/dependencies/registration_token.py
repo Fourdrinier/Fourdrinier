@@ -22,9 +22,11 @@ def generate_registration_token():
     registration_token_file = os.environ.get(
         "REGISTRATION_TOKEN_FILE", "/var/lib/fourdrinier/registration_token"
     )
-    print(registration_token_file)
-    with open(registration_token_file, "w") as f:
-        f.write(registration_token)
+    try:
+        with open(registration_token_file, "w") as f:
+            f.write(registration_token)
+    except IsADirectoryError:
+        raise IsADirectoryError(f"{registration_token_file} is a directory, not a file")
 
     # Return the token
     return registration_token
