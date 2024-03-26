@@ -19,3 +19,6 @@
     - Result: HTTP 403 - Unauthorized
 
 
+## /users
+
+### register_user() [POST /users]

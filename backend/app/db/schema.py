@@ -48,3 +48,8 @@ class UserCreate(BaseModel):
         description="The email of the user",
         example="example@example.com",
     )
+    registration_token: Optional[str] = Field(
+        None,
+        title="Registration Token",
+        description="Registration token for first time setup",
+    )
