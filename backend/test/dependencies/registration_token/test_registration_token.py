@@ -12,7 +12,9 @@ the GPLv3 License. See the LICENSE file for more details.
 
 import os
 import pytest
-from app.dependencies.registration_token import generate_registration_token
+from app.dependencies.registration_token.registration_token import (
+    generate_registration_token,
+)
 
 
 @pytest.mark.asyncio

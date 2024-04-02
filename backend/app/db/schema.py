@@ -19,13 +19,19 @@ class ServerCreate(BaseModel):
         default="My Server",
         title="Server Name",
         description="The name of the server",
-        example="Vanilla+ Server",
+        json_schema_extra={"examples": ["My Server"]},
     )
     loader: str = Field(
-        ..., title="Loader", pattern="^(paper|fabric)$", example="paper"
+        ...,
+        title="Loader",
+        pattern="^(paper|fabric)$",
+        json_schema_extra={"examples": ["paper"]},
     )
     game_version: str = Field(
-        ..., pattern=r"^\d+\.\d+\.\d+$", title="Game Version", example="1.17.1"
+        ...,
+        pattern=r"^\d+\.\d+\.\d+$",
+        title="Game Version",
+        json_schema_extra={"examples": ["1.17.1"]},
     )
 
 
@@ -34,19 +40,25 @@ class UserCreate(BaseModel):
         default="user",
         title="Username",
         description="The username of the user",
-        example="user",
+        json_schema_extra={"examples": ["user"]},
     )
     password: str = Field(
         default="password",
         title="Password",
         description="The password of the user",
-        example="password",
+        json_schema_extra={"examples": ["password"]},
     )
     email: Optional[str] = Field(
         None,
         title="Email",
         description="The email of the user",
-        example="example@example.com",
+        json_schema_extra={"examples": ["example@example.com"]},
+    )
+    is_superuser: bool = Field(
+        default=False,
+        title="Superuser",
+        description="Is the user a superuser",
+        json_schema_extra={"examples": [False]},
     )
     registration_token: Optional[str] = Field(
         None,

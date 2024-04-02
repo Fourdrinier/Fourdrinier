@@ -21,6 +21,10 @@ from app.db.models import Base
 from app.db.session import get_db
 from app.app import app
 
+from app.dependencies.registration_token.registration_token import (
+    generate_registration_token,
+)
+
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 TEST_STORAGE = "/tmp/fourdrinier"
 
@@ -81,3 +85,14 @@ async def client(monkeypatch, test_db):
 
     with TestClient(app) as client:
         yield client
+
+
+@pytest_asyncio.fixture(scope="function")
+async def test_reg_token(monkeypatch, test_storage):
+    """
+    Create a registration token file for use in testing
+    """
+    registration_token_file = os.path.join(test_storage, "registration_token")
+    monkeypatch.setenv("REGISTRATION_TOKEN_FILE", registration_token_file)
+    yield generate_registration_token()
+    os.remove(registration_token_file)
