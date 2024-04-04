@@ -21,16 +21,16 @@
 
 ## /users
 
-### register_user() [POST /users]
-- **[000] test_register_user_000_nominal_superuser**
+### register_superuser() [POST /users/superuser]
+- **[000] test_register_superuser_000_nominal_superuser**
     - Conditions: No users in database
     - Result: HTTP 201: Superuser created
-- **[001] test_register_user_001_nominal_standard_user**
+- **[001] test_register_superuser_001_anomalous_superuser_present**
     - Conditions: One superuser in database
-    - Result: HTTP 201: Standard user created
-- **[002] test_register_user_002_anomalous_superuser_no_token**
-    - Conditions: Invalid token included in request to create superuser
-    - Result: HTTP 400: Please include registration token found in $REGISTRATION_TOKEN_PATH
-- **[004] test_register_user_003_anomalous_username_taken**
-    - Conditions: User with username in database
-    - Result: HTTP 400: That username is unavailable
+    - Result: HTTP 404
+- **[002] test_register_superuser_002_anomalous_no_token**
+    - Conditions: No token included in request for superuser
+    - Result: HTTP 400: Superuser registration requires a registration token
+- **[003] test_register_superuser_003_anomalous_invalid_token**
+    - Conditions: Invalid token included in request to register superuser
+    - Result: HTTP 400: Invalid registration token

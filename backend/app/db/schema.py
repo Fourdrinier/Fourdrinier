@@ -54,12 +54,6 @@ class UserCreate(BaseModel):
         description="The email of the user",
         json_schema_extra={"examples": ["example@example.com"]},
     )
-    is_superuser: bool = Field(
-        default=False,
-        title="Superuser",
-        description="Is the user a superuser",
-        json_schema_extra={"examples": [False]},
-    )
     registration_token: Optional[str] = Field(
         None,
         title="Registration Token",

@@ -28,25 +28,25 @@ router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-@router.post("/register", status_code=201)
+@router.post("/superuser", status_code=201)
 async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     """
-    Register a new user
+    Register a new superuser
     """
-    # Check if the user already exists
-    existing_user = await db.get(User, user.username)
-    if existing_user:
-        raise HTTPException(status_code=400, detail="User already exists")
+    # Check if there are already users in the database. If so, make the endpoint unavailable
+    result = await db.execute(select(User))
+    users = result.scalars().all()
+    if len(users) > 0:
+        raise HTTPException(status_code=404)
 
-    # Ensure that if the user is to be a superuser, they have a valid registration token
-    if user.is_superuser:
-        if not user.registration_token:
-            raise HTTPException(
-                status_code=400,
-                detail="Superuser registration requires a registration token",
-            )
-        if user.registration_token != os.getenv("REGISTRATION_TOKEN"):
-            raise HTTPException(status_code=400, detail="Invalid registration token")
+    # Ensure that the user provided a valid registration token
+    if not user.registration_token:
+        raise HTTPException(
+            status_code=400,
+            detail="Superuser registration requires a registration token",
+        )
+    if user.registration_token != os.getenv("REGISTRATION_TOKEN"):
+        raise HTTPException(status_code=400, detail="Invalid registration token")
 
     # Hash the password
     hashed_password = pwd_context.hash(user.password)
@@ -56,7 +56,7 @@ async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         username=user.username,
         email=user.email,
         hashed_password=hashed_password,
-        is_superuser=user.is_superuser,
+        is_superuser=True,
     )
     db.add(user_object)
     await db.commit()
