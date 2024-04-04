@@ -1,0 +1,16 @@
+### generate_registration_token()
+- **[000] test_generate_registration_token_000_nominal_first_time_startup**
+    - Conditions: No registration token file exists yet
+    - Result: Registration token return and file created
+- **[001] test_generate_registration_token_001_nominal_existing_token_file**
+    - Conditions: Token file exists
+    - Result: Token file overwritten and token returned
+- **[002] test_generate_registration_token_002_anomalous_path_is_a_dir**
+    - Conditions: The given path is a directory, not a file
+    - Result: IsADirectoryError
+- **[003] test_generate_registration_token_003_anomalous_nonexistent_file**
+    - Conditions: The given filepath does not exist
+    - Result: FileNotFoundError
+- **[004] test_generate_registration_token_004_anomalous_insufficient_permissions**
+    - Conditions: Insufficient permissions
+    - Result: PermissionError - [Errno 13] Permission denied: '[path]'
