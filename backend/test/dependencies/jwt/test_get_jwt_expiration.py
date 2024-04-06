@@ -42,3 +42,97 @@ async def test_get_jwt_expiration_time_001_anomalous_var_not_set():
     assert (
         str(e.value) == "The environment variable JWT_EXPIRATION_TIME cannot be empty"
     )
+
+
+@pytest.mark.asyncio
+async def test_get_jwt_expiration_time_003_anomalous_not_digit(monkeypatch):
+    """
+    Test 003 - Anomalous
+    Conditions: Environment variable "JWT_EXPIRATION_TIME" = "not_an_integer"
+    Result: ValueError("The environment variable JWT_EXPIRATION_TIME must be an integer")
+    """
+    # Set the environment variable
+    monkeypatch.setenv("JWT_EXPIRATION_TIME", "not_an_integer")
+
+    # Ensure that the correct exception is raised
+    with pytest.raises(ValueError) as e:
+        get_jwt_expiration_time()
+    assert (
+        str(e.value)
+        == "The environment variable JWT_EXPIRATION_TIME must be an integer"
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_jwt_expiration_time_002_anomalous_var_empty(monkeypatch):
+    """
+    Test 002 - Anomalous
+    Conditions: Environment variable "JWT_EXPIRATION_TIME" is an empty string
+    Result: EnvironmentError("The environment variable JWT_EXPIRATION_TIME cannot be empty")
+    """
+    # Set the environment variable
+    monkeypatch.setenv("JWT_EXPIRATION_TIME", "")
+
+    # Ensure that the correct exception is raised
+    with pytest.raises(EnvironmentError) as e:
+        get_jwt_expiration_time()
+    assert (
+        str(e.value) == "The environment variable JWT_EXPIRATION_TIME cannot be empty"
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_jwt_expiration_time_003_anomalous_not_digit(monkeypatch):
+    """
+    Test 003 - Anomalous
+    Conditions: Environment variable "JWT_EXPIRATION_TIME" = "not_an_integer"
+    Result: ValueError("The environment variable JWT_EXPIRATION_TIME must be an integer")
+    """
+    # Set the environment variable
+    monkeypatch.setenv("JWT_EXPIRATION_TIME", "not_an_integer")
+
+    # Ensure that the correct exception is raised
+    with pytest.raises(ValueError) as e:
+        get_jwt_expiration_time()
+    assert (
+        str(e.value)
+        == "The environment variable JWT_EXPIRATION_TIME must be an integer"
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_jwt_expiration_time_004_anomalous_non_integer(monkeypatch):
+    """
+    Test 004 - Anomalous
+    Conditions: Environment variable "JWT_EXPIRATION_TIME" = "1.5"
+    Result: ValueError("The environment variable JWT_EXPIRATION_TIME must be an integer")
+    """
+    # Set the environment variable
+    monkeypatch.setenv("JWT_EXPIRATION_TIME", "1.5")
+
+    # Ensure that the correct exception is raised
+    with pytest.raises(ValueError) as e:
+        get_jwt_expiration_time()
+    assert (
+        str(e.value)
+        == "The environment variable JWT_EXPIRATION_TIME must be an integer"
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_jwt_expiration_time_005_anomalous_less_than_one(monkeypatch):
+    """
+    Test 005 - Anomalous
+    Conditions: Environment variable "JWT_EXPIRATION_TIME" = "0"
+    Result: ValueError("The environment variable JWT_EXPIRATION_TIME must be >= 1 (in minutes)")
+    """
+    # Set the environment variable
+    monkeypatch.setenv("JWT_EXPIRATION_TIME", "0")
+
+    # Ensure that the correct exception is raised
+    with pytest.raises(ValueError) as e:
+        get_jwt_expiration_time()
+    assert (
+        str(e.value)
+        == "The environment variable JWT_EXPIRATION_TIME must be >= 1 (in minutes)"
+    )

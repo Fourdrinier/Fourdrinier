@@ -26,10 +26,14 @@
     - Conditions: Environment variable "JWT_EXPIRATION_TIME" is an empty string
     - Result: EnvironmentError("The environment variable JWT_EXPIRATION_TIME cannot be empty")
 - **[003] test_get_jwt_expiration_time_003_anomalous_not_digit**
-    - Conditions: Environment variable "JWT_EXPIRATION_TIME" is a non-digit string
+    - Conditions: Environment variable "JWT_EXPIRATION_TIME" = "not_an_integer"
     - Result: ValueError("The environment variable JWT_EXPIRATION_TIME must be an integer"
     )
-- **[004] test_get_jwt_expiration_time_004_anomalous_less_than_one**
+- **[003] test_get_jwt_expiration_time_004_anomalous_non_integer**
+    - Conditions: Environment variable "JWT_EXPIRATION_TIME" = 1.5
+    - Result: ValueError("The environment variable JWT_EXPIRATION_TIME must be an integer"
+    )
+- **[004] test_get_jwt_expiration_time_005_anomalous_less_than_one**
     - Conditions: Environment variable "JWT_EXPIRATION_TIME" = 0
     - Result: ValueError("The environment variable JWT_EXPIRATION_TIME must be >= 1 (in minutes)")
 
