@@ -16,13 +16,9 @@ from app.dependencies.jwt.get_secret_key import get_secret_key
 
 def generate_jwt(username: str) -> str:
     """Generate a JWT token for a user"""
-    # Ensure that a username is provided
-    if username is None or username == "":
-        raise ValueError("Username cannot be empty")
-
-    # Ensure that the username is a string
-    if not isinstance(username, str):
-        raise TypeError("Username must be a string")
+    # Ensure that a username is provided and is a string
+    if username is None or username == "" or not isinstance(username, str):
+        raise ValueError(f"'username' must be of type <class 'str'>, not {type(username)}")
 
     # Generate the JWT
     payload = {"username": username}

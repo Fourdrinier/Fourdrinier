@@ -39,9 +39,12 @@
 
 
 ### generate_jwt()
-- **[000] test_generate_jwt_000_anomalous_no_username**
-    - Conditions: No username provided
+- **[000] test_generate_jwt_000_nominal**
+    - Conditions: Username provided
+    - Result: JWT returned
+- **[001] test_generate_jwt_001_anomalous_no_username**
+    - Conditions: username = None
     - Result: ValueError('username' must be of type <class 'str'>, not <class 'NoneType'>)
-- **[001] test_generate_jwt_001_anomalous_username_is_not_string**
-    - Conditions: Username is a string
+- **[002] test_generate_jwt_002_anomalous_username_is_not_string**
+    - Conditions: username = 1
     - Result: ValueError('username' must be of type <class 'str'>, not <class 'int'>)
