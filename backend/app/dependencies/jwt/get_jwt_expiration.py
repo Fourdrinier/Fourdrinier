@@ -36,4 +36,4 @@ def get_jwt_expiration_time() -> int:
             "The environment variable JWT_EXPIRATION_TIME must be at least 1 minute"
         )
 
-    return expiration_time
+    return int(expiration_time)
