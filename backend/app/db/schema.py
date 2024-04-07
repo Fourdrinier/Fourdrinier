@@ -59,3 +59,18 @@ class UserCreate(BaseModel):
         title="Registration Token",
         description="Registration token for first time setup",
     )
+
+
+class UserLogin(BaseModel):
+    username: str = Field(
+        default="user",
+        title="Username",
+        description="The username of the user",
+        json_schema_extra={"examples": ["user"]},
+    )
+    password: str = Field(
+        default="password",
+        title="Password",
+        description="The password of the user",
+        json_schema_extra={"examples": ["password"]},
+    )

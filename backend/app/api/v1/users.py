@@ -12,16 +12,17 @@ the GPLv3 License. See the LICENSE file for more details.
 
 import os
 from fastapi import APIRouter, Depends, HTTPException
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import secrets
 from passlib.context import CryptContext
 
 from app.db.models import User
-from app.db.schema import UserCreate
+from app.db.schema import UserCreate, UserLogin
 from app.db.session import get_db
 
+from app.dependencies.jwt.generate_jwt import generate_jwt
 
 router = APIRouter()
 
@@ -64,3 +65,33 @@ async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
 
     # Return the user's username and superuser status
     return {"username": user_object.username, "is_superuser": user_object.is_superuser}
+
+
+@router.post("/login", status_code=200)
+async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
+    """
+    Log in a user
+    """
+    # Get the user from the database
+    result = await db.execute(select(User).where(User.username == user.username))
+    user_object = result.scalars().first()
+
+    # Check if the user exists
+    if not user_object:
+        raise HTTPException(status_code=404, detail="The provided credentials were incorrect")
+
+    # Check the password
+    if not pwd_context.verify(user.password, user_object.hashed_password):
+        raise HTTPException(status_code=401, detail="The provided credentials were incorrect")
+
+    # Create a JWT
+    jwt = generate_jwt(username=user.username)
+
+    # Create a refresh token
+    refresh_token = secrets.token_hex(32)
+    user_object.refresh_token = refresh_token
+    await db.commit()
+    await db.refresh(user_object)
+
+    # Return the user's username and superuser status
+    return {"username": user_object.username, "jwt": jwt, "refresh_token": user_object.refresh_token}

@@ -12,12 +12,14 @@ the GPLv3 License. See the LICENSE file for more details.
 
 import os
 import shutil
+import secrets
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+from passlib.context import CryptContext
 from fastapi.testclient import TestClient
 
-from app.db.models import Base
+from app.db.models import Base, User
 from app.db.session import get_db
 from app.app import app
 
@@ -28,6 +30,8 @@ from app.dependencies.registration_token.registration_token import (
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 TEST_STORAGE = "/tmp/fourdrinier"
 
+test_secret_key = secrets.token_hex(32)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
 async def test_storage():
@@ -96,3 +100,14 @@ async def test_reg_token(monkeypatch, test_storage):
     monkeypatch.setenv("REGISTRATION_TOKEN_FILE", registration_token_file)
     yield generate_registration_token()
     os.remove(registration_token_file)
+
+
+@pytest_asyncio.fixture(scope="function")
+async def seed_user(monkeypatch, test_db):
+    monkeypatch.setenv("SECRET_KEY", test_secret_key)
+    hashed_password = pwd_context.hash("password")
+    user = User(username="test-user", hashed_password=hashed_password)
+    test_db.add(user)
+    await test_db.commit()
+    await test_db.refresh(user)
+    yield user
