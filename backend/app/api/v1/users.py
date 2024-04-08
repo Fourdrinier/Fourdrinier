@@ -78,7 +78,7 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
 
     # Check if the user exists
     if not user_object:
-        raise HTTPException(status_code=404, detail="The provided credentials were incorrect")
+        raise HTTPException(status_code=401, detail="The provided credentials were incorrect")
 
     # Check the password
     if not pwd_context.verify(user.password, user_object.hashed_password):

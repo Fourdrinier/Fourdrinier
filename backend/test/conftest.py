@@ -106,7 +106,7 @@ async def test_reg_token(monkeypatch, test_storage):
 async def seed_user(monkeypatch, test_db):
     monkeypatch.setenv("SECRET_KEY", test_secret_key)
     hashed_password = pwd_context.hash("password")
-    user = User(username="test-user", hashed_password=hashed_password)
+    user = User(username="test-user", hashed_password=hashed_password, refresh_token=None)
     test_db.add(user)
     await test_db.commit()
     await test_db.refresh(user)
