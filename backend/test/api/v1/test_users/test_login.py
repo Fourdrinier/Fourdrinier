@@ -116,7 +116,7 @@ async def test_login_003_anomalous_nonexistent_user(monkeypatch, client, test_db
 
 
 @pytest.mark.asyncio
-async def test_login_004_anomalous_incortect_password(monkeypatch, client, test_db, seed_user):
+async def test_login_004_anomalous_incorrect_password(monkeypatch, client, test_db, seed_user):
     """
     Test 004 - Anomalous
     Conditions: Incorrect password provided

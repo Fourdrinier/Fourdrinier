@@ -52,3 +52,24 @@
 - **[004] test_login_004_anomalous_incorrect_password**
   - Conditions: Incorrect password provided
   - Result: HTTP 401 - "The provided credentials were incorrect"
+
+
+### refresh() [POST /users/refresh]
+- **[000] test_refresh_000_nominal**
+  - Conditions: Valid username and refresh token given
+  - Result: HTTP 201 - New JWT and refresh token returned
+- **[001] test_refresh_001_anomalous_no_token**
+  - Conditions: Valid username given, no refresh token given
+  - Result: HTTP 422 - Pydantic error
+- **[002] test_refresh_002_anomalous_no_username**
+  - Conditions: No username given, valid refresh token given
+  - Result: HTTP 422 - Pydantic error
+- **[003] test_refresh_003_anomalous_invalid_username**
+  - Conditions: Invalid username given
+  - Result: HTTP 401 - "The provided credentials were incorrect"
+- **[004] test_refresh_004_anomalous_invalid_token**
+  - Conditions: Invalid refresh token given
+  - Result: HTTP 401 - "The provided credentials were incorrect"
+- **[005] test_refresh_005_anomalous_invalid_username_and_token**
+  - Conditions: Invalid username and refresh token given
+  - Result: HTTP 401 - "The provided credentials were incorrect"

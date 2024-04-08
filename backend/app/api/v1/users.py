@@ -95,3 +95,34 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
 
     # Return the user's username and superuser status
     return {"username": user_object.username, "jwt": jwt, "refresh_token": user_object.refresh_token}
+
+
+@router.post("/refresh", status_code=200)
+async def refresh_token(refresh_token: str, client_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Refresh a JWT
+    """
+    # Get the requested user from the database
+    user_response = await db.execute(select(User).where(User.username == client_id))
+    user_object = user_response.scalars().first()
+
+    # Check if the user exists
+    if not user_object:
+        raise HTTPException(status_code=401, detail="The provided credentials were incorrect")
+    
+    # Ensure that the refresh token is valid
+    if user_object.refresh_token != refresh_token:
+        raise HTTPException(status_code=401, detail="The provided credentials were incorrect")
+    
+    # Create a new JWT
+    jwt = generate_jwt(username=user_object.username)
+
+    # Create a new refresh token
+    new_refresh_token = secrets.token_hex(32)
+    user_object.refresh_token = new_refresh_token
+    await db.commit()
+    await db.refresh(user_object)
+
+    # Return the user's username, JWT, and refresh token
+    return {"username": user_object.username, "jwt": jwt, "refresh_token": user_object.refresh_token}
+
