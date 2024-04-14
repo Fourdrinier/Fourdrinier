@@ -18,10 +18,12 @@ def generate_jwt(username: str) -> str:
     """Generate a JWT token for a user"""
     # Ensure that a username is provided and is a string
     if username is None or username == "" or not isinstance(username, str):
-        raise ValueError(f"'username' must be of type <class 'str'>, not {type(username)}")
+        raise ValueError(
+            f"'username' must be of type <class 'str'>, not {type(username)}"
+        )
 
     # Generate the JWT
-    payload = {"username": username}
+    payload = {"sub": username}
     token = jwt.encode(payload, get_secret_key(), algorithm="HS256")
 
     return token

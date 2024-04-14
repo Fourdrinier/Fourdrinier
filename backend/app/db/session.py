@@ -12,7 +12,7 @@ the GPLv3 License. See the LICENSE file for more details.
 
 import asyncpg
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 
@@ -23,7 +23,9 @@ DATABASE_URL = "postgresql+asyncpg://postgres:postgres@postgres:5432/postgres"
 engine = create_async_engine(DATABASE_URL, echo=True)
 
 # Create the session factory
-AsyncSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+AsyncSessionLocal = sessionmaker(
+    autocommit=False, autoflush=False, bind=engine, class_=AsyncSession
+)
 
 Base = declarative_base()
 

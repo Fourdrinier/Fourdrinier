@@ -48,3 +48,36 @@
 - **[002] test_generate_jwt_002_anomalous_username_is_not_string**
     - Conditions: username = 1
     - Result: ValueError('username' must be of type <class 'str'>, not <class 'int'>)
+
+
+### get_user_from_jwt()
+- **[000] test_get_user_from_jwt_000_nominal**
+    - Conditions: Valid JWT
+    - Result: User object returned
+- **[001] test_get_user_from_jwt_001_anomalous_bad_token_missing_header**
+    - Conditions:
+    - Result:
+- **[002] test_get_user_from_jwt_002_anomalous_bad_token_missing_payload**
+    - Conditions:
+    - Result:
+- **[003] test_get_user_from_jwt_003_anomalous_bad_token_missing_signature**
+    - Conditions:
+    - Result:
+- **[004] test_get_user_from_jwt_004_anomalous_bad_token_extra_data**
+    - Conditions:
+    - Result:
+- **[005] test_get_user_from_jwt_005_anomalous_bad_token_no_alg**
+    - Conditions:
+    - Result:
+- **[006] test_get_user_from_jwt_006_anomalous_bad_token_invalid_json**
+    - Conditions:
+    - Result:
+- **[007] test_get_user_from_jwt_007_anomalous_invalid_token_expired**
+    - Conditions:
+    - Result:
+- **[008] test_get_user_from_jwt_008_anomalous_invalid_token_missing_username**
+    - Conditions:
+    - Result:
+- **[009] test_get_user_from_jwt_009_anomalous_invalid_token_invalid_username**
+    - Conditions:
+    - Result:

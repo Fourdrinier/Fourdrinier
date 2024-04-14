@@ -17,6 +17,7 @@ import secrets
 from app.dependencies.jwt.get_secret_key import get_secret_key
 from app.dependencies.jwt.generate_jwt import generate_jwt
 
+
 @pytest.mark.asyncio
 async def test_generate_jwt_000_nominal(monkeypatch):
     """
@@ -37,9 +38,10 @@ async def test_generate_jwt_000_nominal(monkeypatch):
 
     # Ensure that the payload was inserted correctly
     payload = jwt.decode(token, get_secret_key(), algorithms=["HS256"])
-    username: str = payload.get("username")
+    username: str = payload.get("sub")
     assert username == "username"
-    
+
+
 @pytest.mark.asyncio
 async def test_generate_jwt_001_anomalous_no_username(monkeypatch):
     """
@@ -57,7 +59,10 @@ async def test_generate_jwt_001_anomalous_no_username(monkeypatch):
     # Ensure that an exception is raised
     with pytest.raises(ValueError) as e:
         jwt = generate_jwt(username=None)
-    assert str(e.value) == "'username' must be of type <class 'str'>, not <class 'NoneType'>"
+    assert (
+        str(e.value)
+        == "'username' must be of type <class 'str'>, not <class 'NoneType'>"
+    )
 
 
 @pytest.mark.asyncio

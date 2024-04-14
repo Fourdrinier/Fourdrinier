@@ -33,6 +33,7 @@ TEST_STORAGE = "/tmp/fourdrinier"
 test_secret_key = secrets.token_hex(32)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 @pytest_asyncio.fixture(scope="function", autouse=True)
 async def test_storage():
     """
@@ -104,10 +105,17 @@ async def test_reg_token(monkeypatch, test_storage):
 
 @pytest_asyncio.fixture(scope="function")
 async def seed_user(monkeypatch, test_db):
-    monkeypatch.setenv("SECRET_KEY", test_secret_key)
     hashed_password = pwd_context.hash("password")
-    user = User(username="test-user", hashed_password=hashed_password, refresh_token=None)
+    user = User(
+        username="test-user", hashed_password=hashed_password, refresh_token=None
+    )
     test_db.add(user)
     await test_db.commit()
     await test_db.refresh(user)
     yield user
+
+
+@pytest_asyncio.fixture(scope="function")
+async def test_jwt_secret_key(monkeypatch):
+    secret_key = secrets.token_hex(32)
+    monkeypatch.setenv("JWT_SECRET_KEY", secret_key)
