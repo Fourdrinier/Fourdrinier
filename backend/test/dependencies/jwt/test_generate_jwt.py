@@ -19,19 +19,14 @@ from app.dependencies.jwt.generate_jwt import generate_jwt
 
 
 @pytest.mark.asyncio
-async def test_generate_jwt_000_nominal(monkeypatch):
+async def test_generate_jwt_000_nominal(
+    monkeypatch, test_jwt_secret_key, test_jwt_expiration_time
+):
     """
     Test 000 - Nominal
     Conditions: Username provided
     Result: JWT returned
     """
-    # Set the secret key environment variable
-    secret_key = secrets.token_hex(32)
-    monkeypatch.setenv("JWT_SECRET_KEY", secret_key)
-
-    # Set the expiration time environment variable
-    monkeypatch.setenv("JWT_EXPIRATION_TIME", "1")
-
     # Generate the JWT
     token = generate_jwt(username="username")
     assert token

@@ -15,6 +15,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import jwt
+from jwt.exceptions import DecodeError, InvalidAlgorithmError, ExpiredSignatureError
 from jose import JWTError
 
 from app.db.session import get_db
@@ -30,6 +31,12 @@ async def get_user_from_jwt(token: str, db: AsyncSession) -> User:
         # Decode and extract the payload from the JWT
         payload = jwt.decode(token, get_secret_key(), algorithms=["HS256"])
     except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid bearer token")
+    except DecodeError:
+        raise HTTPException(status_code=401, detail="Invalid bearer token")
+    except InvalidAlgorithmError:
+        raise HTTPException(status_code=401, detail="Invalid bearer token")
+    except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Invalid bearer token")
 
     # Extract the username from the payload

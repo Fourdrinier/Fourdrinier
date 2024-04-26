@@ -61,26 +61,29 @@
     - Conditions: JWT is missing its payload
     - Result: HTTP 401 - Invalid bearer token
 - **[003] test_get_user_from_jwt_003_anomalous_bad_token_missing_signature**
-    - Conditions: JWT is missing a signature
+    - Conditions: JWT is missing its signature
     - Result: HTTP 401 - Invalid bearer token
 - **[004] test_get_user_from_jwt_004_anomalous_bad_token_extra_data**
     - Conditions: Token contains extra data beyond header, payload, and signature
     - Result: HTTP 401 - Invalid bearer token
 - **[005] test_get_user_from_jwt_005_anomalous_bad_token_no_alg**
     - Conditions: No algorithm specified in header
-    - Result: HTTP 401 - Invalid bearer token
-- **[006] test_get_user_from_jwt_006_anomalous_bad_token_invalid_json**
+    - Result: HTTP 401 - Invalid bearer token - invalid/missing algorithm
+- **[006] test_get_user_from_jwt_006_anomalous_bad_token_wrong_alg**
+    - Conditions: Wrong algorithm specified in header
+    - Result: HTTP 401 - Invalid bearer token - invalid/missing algorithm
+- **[007] test_get_user_from_jwt_007_anomalous_bad_token_invalid_json**
     - Conditions: The contents of the payload is not valid JSON
     - Result: HTTP 401 - Invalid bearer token
-- **[007] test_get_user_from_jwt_007_anomalous_invalid_token_expired**
-    - Conditions: The token is expired
-    - Result: HTTP 401 - Invalid bearer token
-- **[008] test_get_user_from_jwt_008_anomalous_invalid_token_missing_username**
+- **[008] test_get_user_from_jwt_008_anomalous_invalid_token_expired**
+    - Conditions: Token is expired
+    - Result: HTTP 401 - Invalid bearer token - expired
+- **[009] test_get_user_from_jwt_009_anomalous_invalid_token_missing_username**
     - Conditions: The token payload is missing a username
     - Result: HTTP 401 - Invalid bearer token
-- **[009] test_get_user_from_jwt_009_anomalous_invalid_token_invalid_username**
+- **[010] test_get_user_from_jwt_010_anomalous_invalid_token_invalid_username**
     - Conditions: The specified username does not exist
     - Result: HTTP 401 - Invalid bearer token
-- **[010] test_get_user_from_jwt_009_anomalous_invalid_signature**
+- **[011] test_get_user_from_jwt_011_anomalous_invalid_signature**
     - Conditions: The signature does not match the server's signature
     - Result: HTTP 401 - Invalid bearer token

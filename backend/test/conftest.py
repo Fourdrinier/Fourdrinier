@@ -119,3 +119,10 @@ async def seed_user(monkeypatch, test_db):
 async def test_jwt_secret_key(monkeypatch):
     secret_key = secrets.token_hex(32)
     monkeypatch.setenv("JWT_SECRET_KEY", secret_key)
+
+
+@pytest_asyncio.fixture(scope="function")
+async def test_jwt_expiration_time(monkeypatch):
+    expiration_time = 3600
+    monkeypatch.setenv("JWT_EXPIRATION_TIME", expiration_time)
+    yield expiration_time

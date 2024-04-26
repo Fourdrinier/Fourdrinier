@@ -19,15 +19,18 @@ from app.dependencies.jwt.get_secret_key import get_secret_key
 
 
 @pytest.mark.asyncio
-async def test_login_000_nominal(monkeypatch, client, test_db, seed_user):
+async def test_login_000_nominal(
+    client,
+    test_db,
+    seed_user,
+    test_jwt_secret_key,
+    test_jwt_expiration_time,
+):
     """
     Test 000 - Nominal
     Conditions: Correct username and password provided
     Result: HTTP 200 - JWT and refresh token returned
     """
-    test_secret_key = secrets.token_hex(32)
-    monkeypatch.setenv("JWT_SECRET_KEY", test_secret_key)
-
     # Make the request
     response = client.post(
         "/api/v1/users/login", json={"username": "test-user", "password": "password"}

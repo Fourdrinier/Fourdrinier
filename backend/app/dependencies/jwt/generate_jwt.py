@@ -11,19 +11,33 @@ the GPLv3 License. See the LICENSE file for more details.
 """
 
 import jwt
+from datetime import datetime, timedelta
 from app.dependencies.jwt.get_secret_key import get_secret_key
+from app.dependencies.jwt.get_jwt_expiration import get_jwt_expiration_time
 
 
-def generate_jwt(username: str) -> str:
-    """Generate a JWT token for a user"""
-    # Ensure that a username is provided and is a string
+def generate_jwt(username: str, expiration: int = None) -> str:
+    """Generate a JWT token for a user with creation and optional expiration time"""
     if username is None or username == "" or not isinstance(username, str):
         raise ValueError(
             f"'username' must be of type <class 'str'>, not {type(username)}"
         )
 
+    # Set the expiration time to the provided value or get it from the default function
+    if expiration is None:
+        expiration = get_jwt_expiration_time()
+
+    # Calculate the expiration time
+    expiration_time = datetime.utcnow() + timedelta(seconds=expiration)
+
+    # Create the payload with the subject, issued at, and expiration time
+    payload = {
+        "sub": username,
+        "iat": datetime.utcnow(),  # Issued at time
+        "exp": expiration_time,  # Expiration time
+    }
+
     # Generate the JWT
-    payload = {"sub": username}
     token = jwt.encode(payload, get_secret_key(), algorithm="HS256")
 
     return token
