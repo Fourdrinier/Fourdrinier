@@ -10,7 +10,8 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 from app.db.session import Base
 
 
@@ -22,9 +23,14 @@ class User(Base):
     refresh_token = Column(String, default=None)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+    servers = relationship("Server", back_populates="owner")
 
 
 class Server(Base):
     __tablename__ = "server"
     id = Column(String, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
+    loader = Column(String, nullable=False)
+    game_version = Column(String, nullable=False)
+    owner_username = Column(String, ForeignKey("user.username"))
+    owner = relationship("User", back_populates="servers")

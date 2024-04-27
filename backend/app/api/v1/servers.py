@@ -14,9 +14,14 @@ import logging
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.db.session import get_db
-from app.db.models import Server
+from app.db.models import Server, User
+from app.db.schema import ServerCreate, ServerResponse
+from app.db.generate_id import generate_id
+
+from app.dependencies.jwt.validate_user import validate_user
 
 # Create a new FastAPI router
 router = APIRouter()
@@ -33,3 +38,32 @@ async def list_servers(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Server))
     servers = result.scalars().all()
     return servers
+
+
+@router.post("/", status_code=201, response_model=ServerResponse)
+async def create_server(
+    server: ServerCreate,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(validate_user),
+):
+    """
+    Create a new server
+    """
+    # Create a new server object
+    new_server = Server(**server.dict(), id=generate_id())
+
+    # Get the user object and add the server to the user's list of servers
+    stmt = (
+        select(User)
+        .options(selectinload(User.servers))
+        .filter_by(username=user.username)
+    )
+    result = await db.execute(stmt)
+    user = result.scalars().first()
+    user.servers.append(new_server)
+
+    # Save the server to the database
+    await db.commit()
+    await db.refresh(new_server)
+
+    return new_server

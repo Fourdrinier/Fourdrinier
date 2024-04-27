@@ -36,11 +36,20 @@ async def test_list_servers_001_nominal_one_server(client, test_db):
     Result: HTTP 200 - One server object returned
     """
     # Add a server to the database
-    server = Server(id="abcdefgh", name="Test Server")
+    server = Server(
+        id="abcdefgh", name="Test Server", loader="paper", game_version="1.17.1"
+    )
     test_db.add(server)
     await test_db.commit()
 
     # Make a request to the server endpoint
     response = client.get("/api/v1/servers/")
     assert response.status_code == 200
-    assert response.json() == [{"id": "abcdefgh", "name": "Test Server"}]
+    print(response.json())
+    servers = response.json()
+    assert len(servers) == 1
+    server = servers[0]
+    assert server["id"] == "abcdefgh"
+    assert server["name"] == "Test Server"
+    assert server["loader"] == "paper"
+    assert server["game_version"] == "1.17.1"

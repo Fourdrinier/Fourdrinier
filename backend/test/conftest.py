@@ -26,6 +26,7 @@ from app.app import app
 from app.dependencies.registration_token.registration_token import (
     generate_registration_token,
 )
+from app.dependencies.jwt.generate_jwt import generate_jwt
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 TEST_STORAGE = "/tmp/fourdrinier"
@@ -126,3 +127,9 @@ async def test_jwt_expiration_time(monkeypatch):
     expiration_time = 3600
     monkeypatch.setenv("JWT_EXPIRATION_TIME", expiration_time)
     yield expiration_time
+
+
+@pytest_asyncio.fixture(scope="function")
+async def test_jwt(seed_user, test_jwt_secret_key, test_jwt_expiration_time):
+    jwt = generate_jwt(seed_user.username)
+    yield jwt

@@ -22,7 +22,7 @@ class ServerCreate(BaseModel):
         json_schema_extra={"examples": ["My Server"]},
     )
     loader: str = Field(
-        ...,
+        default="paper",
         title="Loader",
         pattern="^(paper|fabric)$",
         json_schema_extra={"examples": ["paper"]},
@@ -33,6 +33,13 @@ class ServerCreate(BaseModel):
         title="Game Version",
         json_schema_extra={"examples": ["1.17.1"]},
     )
+
+
+class ServerResponse(BaseModel):
+    id: str
+    name: str
+    loader: str
+    game_version: str
 
 
 class UserCreate(BaseModel):
