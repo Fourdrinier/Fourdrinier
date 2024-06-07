@@ -32,5 +32,6 @@ class Server(Base):
     name = Column(String, index=True, nullable=False)
     loader = Column(String, nullable=False)
     game_version = Column(String, nullable=False)
+    builder = Column(String, nullable=False, default="docker")
     owner_username = Column(String, ForeignKey("user.username"))
     owner = relationship("User", back_populates="servers")

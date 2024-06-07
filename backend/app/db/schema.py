@@ -32,6 +32,12 @@ class ServerCreate(BaseModel):
         title="Game Version",
         json_schema_extra={"examples": ["1.17.1"]},
     )
+    builder: Optional[str] = Field(
+        default="docker",
+        title="Builder",
+        description="The builder to use",
+        json_schema_extra={"examples": ["docker"]},
+    )
 
 
 class ServerResponse(BaseModel):
