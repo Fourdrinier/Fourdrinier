@@ -24,7 +24,6 @@ class ServerCreate(BaseModel):
     loader: str = Field(
         default="paper",
         title="Loader",
-        pattern="^(paper|fabric)$",
         json_schema_extra={"examples": ["paper"]},
     )
     game_version: str = Field(

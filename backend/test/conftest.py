@@ -124,7 +124,7 @@ async def test_jwt_secret_key(monkeypatch):
 
 @pytest_asyncio.fixture(scope="function")
 async def test_jwt_expiration_time(monkeypatch):
-    expiration_time = 3600
+    expiration_time = "3600"
     monkeypatch.setenv("JWT_EXPIRATION_TIME", expiration_time)
     yield expiration_time
 

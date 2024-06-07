@@ -11,7 +11,7 @@ the MIT License. See the LICENSE file for more details.
 """
 
 import logging
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -21,13 +21,18 @@ from app.db.models import Server, User
 from app.db.schema import ServerCreate, ServerResponse
 from app.db.generate_id import generate_id
 
+from app.dependencies.config.get_config import get_config
 from app.dependencies.jwt.validate_user import validate_user
+
 
 # Create a new FastAPI router
 router = APIRouter()
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+# Get the configuration
+config = get_config()
 
 
 @router.get("/", status_code=200)
@@ -50,7 +55,15 @@ async def create_server(
     Create a new server
     """
     # Create a new server object
-    new_server = Server(**server.dict(), id=generate_id())
+    new_server = Server(**server.model_dump(), id=generate_id())
+
+    # Validate the loader
+    if new_server.loader not in config["loaders"]:
+        raise HTTPException(status_code=400, detail="Invalid loader")
+
+    # Validate the game version
+    if new_server.game_version not in config["supported_versions"]:
+        raise HTTPException(status_code=400, detail="Unsupported game version")
 
     # Get the user object and add the server to the user's list of servers
     stmt = (

@@ -45,7 +45,6 @@ async def test_list_servers_001_nominal_one_server(client, test_db):
     # Make a request to the server endpoint
     response = client.get("/api/v1/servers/")
     assert response.status_code == 200
-    print(response.json())
     servers = response.json()
     assert len(servers) == 1
     server = servers[0]

@@ -251,7 +251,9 @@ async def test_get_user_from_jwt_009_anomalous_invalid_token_missing_username(
     username = seed_user.username
 
     # Calculate the expiration time
-    expiration_time = datetime.utcnow() + timedelta(seconds=test_jwt_expiration_time)
+    expiration_time = datetime.utcnow() + timedelta(
+        seconds=int(test_jwt_expiration_time)
+    )
 
     # Create the payload with the subject, issued at, and expiration time
     payload = {
@@ -282,7 +284,9 @@ async def test_get_user_from_jwt_010_anomalous_invalid_token_invalid_username(
     username = seed_user.username
 
     # Calculate the expiration time
-    expiration_time = datetime.utcnow() + timedelta(seconds=test_jwt_expiration_time)
+    expiration_time = datetime.utcnow() + timedelta(
+        seconds=int(test_jwt_expiration_time)
+    )
 
     # Create the payload with the subject, issued at, and expiration time
     payload = {
