@@ -23,7 +23,7 @@ from app.db.generate_id import generate_id
 
 from app.dependencies.config.get_config import get_config
 from app.dependencies.jwt.validate_user import validate_user
-from app.dependencies.build.build import build
+
 
 # Create a new FastAPI router
 router = APIRouter()
@@ -92,16 +92,3 @@ async def get_server(server_id: str, db: AsyncSession = Depends(get_db)):
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
     return server
-
-
-@router.post("/{server_id}/build", status_code=200)
-async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
-    """
-    Build a server
-    """
-    result = await db.execute(select(Server).filter_by(id=server_id))
-    server = result.scalars().first()
-    if server is None:
-        raise HTTPException(status_code=404, detail="Server not found")
-    await build(server)
-    return {"status": "Building"}

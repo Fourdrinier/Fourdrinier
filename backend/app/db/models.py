@@ -10,9 +10,18 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
+from sqlalchemy import Table, Boolean, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.session import Base
+
+
+# Association table for many-to-many relationship between Playsets and Servers
+playset_server_association = Table(
+    "playsets_servers",
+    Base.metadata,
+    Column("playset_id", String, ForeignKey("playset.id")),
+    Column("server_id", String, ForeignKey("server.id")),
+)
 
 
 class User(Base):
@@ -24,6 +33,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
     servers = relationship("Server", back_populates="owner")
+    playsets = relationship("Playset", back_populates="owner")
 
 
 class Server(Base):
@@ -35,3 +45,18 @@ class Server(Base):
     builder = Column(String, nullable=False, default="docker")
     owner_username = Column(String, ForeignKey("user.username"))
     owner = relationship("User", back_populates="servers")
+    playsets = relationship(
+        "Playset", secondary=playset_server_association, back_populates="servers"
+    )
+
+
+class Playset(Base):
+    __tablename__ = "playset"
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, index=True, nullable=False)
+    description = Column(String, nullable=False)
+    servers = relationship(
+        "Server", secondary=playset_server_association, back_populates="playsets"
+    )
+    owner_username = Column(String, ForeignKey("user.username"))
+    owner = relationship("User", back_populates="playsets")
