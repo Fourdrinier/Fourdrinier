@@ -18,7 +18,7 @@ from sqlalchemy.orm import selectinload
 
 from app.db.session import get_db
 from app.db.models import Playset, User
-from app.db.schema import ServerCreate, ServerResponse
+from app.db.schema import ServerCreate, ServerResponse, PlaylistResponse
 from app.db.generate_id import generate_id
 
 from app.dependencies.config.get_config import get_config
@@ -32,11 +32,24 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.get("/", status_code=200)
-async def list_playsets(db: AsyncSession = Depends(get_db)):
+@router.get("/", status_code=200, response_model=list[PlaylistResponse])
+async def list_playsets(
+    db: AsyncSession = Depends(get_db), user: User = Depends(validate_user)
+):
     """
     List all playsets
     """
-    result = await db.execute(select(Playset))
-    servers = result.scalars().all()
-    return servers
+    # If the user is a superuser, get all playsets
+    stmt = select(Playset)
+
+    # If the user is not a superuser, filter the playsets
+    if not user.is_superuser:
+        stmt = stmt.where(
+            (Playset.owner_username == user.username) | (Playset.is_private == False)
+        )
+
+    # Get the applicable playsets
+    result = await db.execute(stmt)
+    playsets = result.scalars().all()
+
+    return playsets

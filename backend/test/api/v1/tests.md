@@ -99,6 +99,12 @@
 - **[000] test_list_playsets_000_nominal_no_playsets**
   - Conditions: User is superuser, no playsets in db
   - Result: HTTP 200 - []
-- **[000] test_list_playsets_001_nominal_no_playsets_available**
-  - Conditions: User test-user1 is not a superuser, user test-user2 has one private playset
+- **[001] test_list_playsets_001_nominal_no_playsets_available**
+  - Conditions: User test-user is not a superuser, user test-user2 has one private playset
   - Result: HTTP 200 - []
+- **[002] test_list_playsets_002_nominal_admin_views_private**
+  - Conditions: Request sent by superuser, test-user has one private playset
+  - Result: HTTP 200 - [\<test-user playset\>]
+- **[003] test_list_playsets_003_nominal_user1_views_user2_public**
+  - Conditions: Request sent by test-user1, test-user1 has one private playset, test-user2 has one public playset
+  - Result: HTTP 200 - [\<test-user playset\>, \<test-user2 playset\>]

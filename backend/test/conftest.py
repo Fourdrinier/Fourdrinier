@@ -160,3 +160,17 @@ async def test_jwt_expiration_time(monkeypatch):
 async def test_jwt(seed_user, test_jwt_secret_key, test_jwt_expiration_time):
     jwt = generate_jwt(seed_user.username)
     yield jwt
+
+
+@pytest_asyncio.fixture(scope="function")
+async def test_jwt_user2(seed_user2, test_jwt_secret_key, test_jwt_expiration_time):
+    jwt = generate_jwt(seed_user.username)
+    yield jwt
+
+
+@pytest_asyncio.fixture(scope="function")
+async def test_jwt_superuser(
+    seed_superuser, test_jwt_secret_key, test_jwt_expiration_time
+):
+    jwt = generate_jwt(seed_superuser.username)
+    yield jwt

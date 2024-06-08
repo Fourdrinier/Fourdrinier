@@ -39,7 +39,7 @@ class User(Base):
 class Server(Base):
     __tablename__ = "server"
     id = Column(String, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)
+    name = Column(String, index=True, nullable=False, default="My Server")
     loader = Column(String, nullable=False)
     game_version = Column(String, nullable=False)
     builder = Column(String, nullable=False, default="docker")
@@ -54,8 +54,13 @@ class Server(Base):
 class Playset(Base):
     __tablename__ = "playset"
     id = Column(String, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)
-    description = Column(String, nullable=False)
+    name = Column(
+        String,
+        index=True,
+        nullable=False,
+        default="My Playset",
+    )
+    description = Column(String, default="")
     servers = relationship(
         "Server", secondary=playset_server_association, back_populates="playsets"
     )

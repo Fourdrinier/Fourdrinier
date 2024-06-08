@@ -84,3 +84,11 @@ class UserLogin(BaseModel):
         description="The password of the user",
         json_schema_extra={"examples": ["password"]},
     )
+
+
+class PlaylistResponse(BaseModel):
+    id: str
+    name: str
+    description: str
+    owner_username: str
+    is_private: bool
