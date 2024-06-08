@@ -1,8 +1,8 @@
 """Initial revision
 
-Revision ID: 9527ee041574
+Revision ID: 467367bc60a9
 Revises: 
-Create Date: 2024-06-08 20:04:36.937488
+Create Date: 2024-06-08 20:13:02.663498
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '9527ee041574'
+revision: str = '467367bc60a9'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -36,6 +36,7 @@ def upgrade() -> None:
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('description', sa.String(), nullable=False),
     sa.Column('owner_username', sa.String(), nullable=True),
+    sa.Column('is_private', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['owner_username'], ['user.username'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -48,6 +49,7 @@ def upgrade() -> None:
     sa.Column('game_version', sa.String(), nullable=False),
     sa.Column('builder', sa.String(), nullable=False),
     sa.Column('owner_username', sa.String(), nullable=True),
+    sa.Column('is_private', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['owner_username'], ['user.username'], ),
     sa.PrimaryKeyConstraint('id')
     )

@@ -91,3 +91,14 @@
 - **[005] test_refresh_005_anomalous_invalid_username_and_token**
   - Conditions: Invalid username and refresh token given
   - Result: HTTP 401 - "The provided credentials were incorrect"
+
+
+## /playsets
+
+### list_playsets() [GET /playsets]
+- **[000] test_list_playsets_000_nominal_no_playsets**
+  - Conditions: User is superuser, no playsets in db
+  - Result: HTTP 200 - []
+- **[000] test_list_playsets_001_nominal_no_playsets_available**
+  - Conditions: User test-user1 is not a superuser, user test-user2 has one private playset
+  - Result: HTTP 200 - []

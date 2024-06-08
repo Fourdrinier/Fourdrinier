@@ -117,6 +117,33 @@ async def seed_user(monkeypatch, test_db):
 
 
 @pytest_asyncio.fixture(scope="function")
+async def seed_user2(monkeypatch, test_db):
+    hashed_password = pwd_context.hash("password")
+    user = User(
+        username="test-user2", hashed_password=hashed_password, refresh_token=None
+    )
+    test_db.add(user)
+    await test_db.commit()
+    await test_db.refresh(user)
+    yield user
+
+
+@pytest_asyncio.fixture(scope="function")
+async def seed_superuser(monkeypatch, test_db):
+    hashed_password = pwd_context.hash("password")
+    user = User(
+        username="admin",
+        hashed_password=hashed_password,
+        refresh_token=None,
+        is_superuser=True,
+    )
+    test_db.add(user)
+    await test_db.commit()
+    await test_db.refresh(user)
+    yield user
+
+
+@pytest_asyncio.fixture(scope="function")
 async def test_jwt_secret_key(monkeypatch):
     secret_key = secrets.token_hex(32)
     monkeypatch.setenv("JWT_SECRET_KEY", secret_key)

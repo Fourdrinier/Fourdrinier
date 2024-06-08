@@ -45,6 +45,7 @@ class Server(Base):
     builder = Column(String, nullable=False, default="docker")
     owner_username = Column(String, ForeignKey("user.username"))
     owner = relationship("User", back_populates="servers")
+    is_private = Column(Boolean, default=False)
     playsets = relationship(
         "Playset", secondary=playset_server_association, back_populates="servers"
     )
@@ -60,3 +61,4 @@ class Playset(Base):
     )
     owner_username = Column(String, ForeignKey("user.username"))
     owner = relationship("User", back_populates="playsets")
+    is_private = Column(Boolean, default=False)
