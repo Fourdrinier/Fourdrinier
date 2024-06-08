@@ -18,7 +18,7 @@ from sqlalchemy.orm import selectinload
 
 from app.db.session import get_db
 from app.db.models import Playset, User
-from app.db.schema import ServerCreate, ServerResponse, PlaylistResponse
+from app.db.schema import PlaysetResponse
 from app.db.generate_id import generate_id
 
 from app.dependencies.config.get_config import get_config
@@ -32,7 +32,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.get("/", status_code=200, response_model=list[PlaylistResponse])
+@router.get("/", status_code=200, response_model=list[PlaysetResponse])
 async def list_playsets(
     db: AsyncSession = Depends(get_db), user: User = Depends(validate_user)
 ):

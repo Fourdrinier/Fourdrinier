@@ -86,7 +86,7 @@ class UserLogin(BaseModel):
     )
 
 
-class PlaylistResponse(BaseModel):
+class PlaysetResponse(BaseModel):
     id: str
     name: str
     description: str
