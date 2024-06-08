@@ -24,5 +24,9 @@ COPY ./app /backend/app
 # Copy in the configuration file
 COPY ./config.json /backend/config.json
 
+# Create the registration token file
+RUN mkdir /var/lib/fourdrinier
+RUN touch /var/lib/fourdrinier/registration_token
+
 # Start the FastAPI app
 CMD python -m alembic upgrade head && python -m uvicorn app.app:app --host 0.0.0.0 --port 8000
