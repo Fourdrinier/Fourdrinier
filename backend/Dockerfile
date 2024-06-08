@@ -21,5 +21,8 @@ EXPOSE 8000
 # Copy the rest of your application's code
 COPY ./app /backend/app
 
+# Copy in the configuration file
+COPY ./config.json /backend/config.json
+
 # Start the FastAPI app
 CMD python -m alembic upgrade head && python -m uvicorn app.app:app --host 0.0.0.0 --port 8000

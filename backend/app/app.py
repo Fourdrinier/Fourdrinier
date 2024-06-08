@@ -14,6 +14,12 @@ from fastapi import FastAPI
 from app.api.v1.servers import router as servers_router
 from app.api.v1.users import router as users_router
 
+from app.dependencies.registration_token.registration_token import generate_registration_token
+
+# Generate the registration token
+REGISTRATION_TOKEN = generate_registration_token()
+
+# Create the FastAPI app
 app = FastAPI()
 
 # Include the routers

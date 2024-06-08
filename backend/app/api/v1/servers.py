@@ -80,3 +80,28 @@ async def create_server(
     await db.refresh(new_server)
 
     return new_server
+
+
+@router.get("/{server_id}", status_code=200)
+async def get_server(server_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Get a server by ID
+    """
+    result = await db.execute(select(Server).filter_by(id=server_id))
+    server = result.scalars().first()
+    if server is None:
+        raise HTTPException(status_code=404, detail="Server not found")
+    return server
+
+
+@router.post("/{server_id}/build", status_code=200)
+async def build_server(server_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Build a server
+    """
+    result = await db.execute(select(Server).filter_by(id=server_id))
+    server = result.scalars().first()
+    if server is None:
+        raise HTTPException(status_code=404, detail="Server not found")
+    await build(server)
+    return {"status": "Building"}
