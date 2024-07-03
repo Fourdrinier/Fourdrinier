@@ -34,7 +34,7 @@ async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     """
     Register a new superuser
     """
-    # Check if there are already users in the database. If so, make the endpoint unavailable
+    # Check if there are already users in the database. If so, restrict endpoint.
     result = await db.execute(select(User))
     users = result.scalars().all()
     if len(users) > 0:
@@ -78,11 +78,15 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
 
     # Check if the user exists
     if not user_object:
-        raise HTTPException(status_code=401, detail="The provided credentials were incorrect")
+        raise HTTPException(
+            status_code=401, detail="The provided credentials were incorrect"
+        )
 
     # Check the password
     if not pwd_context.verify(user.password, user_object.hashed_password):
-        raise HTTPException(status_code=401, detail="The provided credentials were incorrect")
+        raise HTTPException(
+            status_code=401, detail="The provided credentials were incorrect"
+        )
 
     # Create a JWT
     jwt = generate_jwt(username=user.username)
@@ -94,11 +98,17 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     await db.refresh(user_object)
 
     # Return the user's username and superuser status
-    return {"username": user_object.username, "jwt": jwt, "refresh_token": user_object.refresh_token}
+    return {
+        "username": user_object.username,
+        "jwt": jwt,
+        "refresh_token": user_object.refresh_token,
+    }
 
 
 @router.post("/refresh", status_code=200)
-async def refresh_token(refresh_token: str, client_id: str, db: AsyncSession = Depends(get_db)):
+async def refresh_token(
+    refresh_token: str, client_id: str, db: AsyncSession = Depends(get_db)
+):
     """
     Refresh a JWT
     """
@@ -108,12 +118,16 @@ async def refresh_token(refresh_token: str, client_id: str, db: AsyncSession = D
 
     # Check if the user exists
     if not user_object:
-        raise HTTPException(status_code=401, detail="The provided credentials were incorrect")
-    
+        raise HTTPException(
+            status_code=401, detail="The provided credentials were incorrect"
+        )
+
     # Ensure that the refresh token is valid
     if user_object.refresh_token != refresh_token:
-        raise HTTPException(status_code=401, detail="The provided credentials were incorrect")
-    
+        raise HTTPException(
+            status_code=401, detail="The provided credentials were incorrect"
+        )
+
     # Create a new JWT
     jwt = generate_jwt(username=user_object.username)
 
@@ -124,5 +138,8 @@ async def refresh_token(refresh_token: str, client_id: str, db: AsyncSession = D
     await db.refresh(user_object)
 
     # Return the user's username, JWT, and refresh token
-    return {"username": user_object.username, "jwt": jwt, "refresh_token": user_object.refresh_token}
-
+    return {
+        "username": user_object.username,
+        "jwt": jwt,
+        "refresh_token": user_object.refresh_token,
+    }
