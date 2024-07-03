@@ -1,6 +1,9 @@
 # Use the official Python base image
 FROM python:3.11-slim
 
+# Create a non-root user and group
+RUN adduser --system --no-create-home nonroot
+
 # Set the working directory in the container
 WORKDIR /backend
 
@@ -27,8 +30,14 @@ COPY ./test /backend/test
 # Copy in the configuration file
 COPY ./config.json /backend/config.json
 
+# Create the directory and change ownership
+RUN mkdir -p /var/lib/fourdrinier && \
+    chown -R nonroot /var/lib/fourdrinier
+
+# Switch to the non-root user
+USER nonroot
+
 # Create the registration token file
-RUN mkdir /var/lib/fourdrinier
 RUN touch /var/lib/fourdrinier/registration_token
 
 # Start the FastAPI app
