@@ -1,0 +1,5 @@
+[flake8]
+max-complexity = 10
+max-line-length = 88
+style = google
+allow_init_docstring = True
