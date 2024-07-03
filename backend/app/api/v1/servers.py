@@ -11,10 +11,12 @@ the MIT License. See the LICENSE file for more details.
 """
 
 import logging
+from typing import Tuple
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import Result, select
 from sqlalchemy.orm import selectinload
+from typing import Sequence
 
 from app.db.session import get_db
 from app.db.models import Server, User
@@ -24,12 +26,13 @@ from app.db.generate_id import generate_id
 from app.dependencies.config.get_config import get_config
 from app.dependencies.jwt.validate_user import validate_user
 
+from app.db.crud import get_servers
 
 # Create a new FastAPI router
 router = APIRouter()
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 # Get the configuration
 config = get_config()
@@ -40,8 +43,7 @@ async def list_servers(db: AsyncSession = Depends(get_db)):
     """
     List all servers
     """
-    result = await db.execute(select(Server))
-    servers = result.scalars().all()
+    servers: Sequence[Server] = await get_servers(db)
     return servers
 
 
