@@ -77,7 +77,7 @@ async def test_list_playsets_002_nominal_admin_views_private(
     """
     Test 002 - Nominal
     Conditions: Request sent by superuser, test-user has one private playset
-    Result: HTTP 200 - [\<test-user playset\>]
+    Result: HTTP 200 - [<test-user playset>]
     """
     # Eagerly load in test-user's playsets
     stmt = (
@@ -115,7 +115,7 @@ async def test_list_playsets_003_nominal_user1_views_user2_public(
     """
     Test 003 - Nominal
     Conditions: Request sent by test-user1, test-user1 has one private playset, test-user2 has one public playset
-    Result:HTTP 200 - [\<test-user playset\>, \<test-user2 playset\>]
+    Result:HTTP 200 - [<test-user playset>, <test-user2 playset>]
     """
     # Eagerly load in test-user1's playsets
     stmt = (
