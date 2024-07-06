@@ -14,10 +14,10 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies.jwt.get_user_from_jwt import get_user_from_jwt
+from backend.app.dependencies.jwt.get_user_from_jwt import get_user_from_jwt
 
-from app.db.models import User
-from app.db.session import get_db
+from backend.app.db.models import User
+from backend.app.db.session import get_db
 
 # Create an OAuth2 password bearer object
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

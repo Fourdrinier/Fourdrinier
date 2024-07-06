@@ -18,11 +18,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import secrets
 from passlib.context import CryptContext
 
-from app.db.models import User
-from app.db.schema import UserCreate, UserLogin
-from app.db.session import get_db
+from backend.app.db.models import User
+from backend.app.db.schema import UserCreate, UserLogin
+from backend.app.db.session import get_db
 
-from app.dependencies.jwt.generate_jwt import generate_jwt
+from backend.app.dependencies.jwt.generate_jwt import generate_jwt
 
 router = APIRouter()
 

@@ -12,8 +12,8 @@ the GPLv3 License. See the LICENSE file for more details.
 
 import jwt
 from datetime import datetime, timedelta
-from app.dependencies.jwt.get_secret_key import get_secret_key
-from app.dependencies.jwt.get_jwt_expiration import get_jwt_expiration_time
+from backend.app.dependencies.jwt.get_secret_key import get_secret_key
+from backend.app.dependencies.jwt.get_jwt_expiration import get_jwt_expiration_time
 
 
 def generate_jwt(username: str, expiration: int = None) -> str:

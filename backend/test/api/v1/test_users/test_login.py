@@ -13,9 +13,9 @@ import secrets
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from app.db.models import User
+from backend.app.db.models import User
 
-from app.dependencies.jwt.get_secret_key import get_secret_key
+from backend.app.dependencies.jwt.get_secret_key import get_secret_key
 
 
 @pytest.mark.asyncio

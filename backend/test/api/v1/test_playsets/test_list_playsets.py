@@ -15,7 +15,7 @@ import pytest
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select
 
-from app.db.models import Server, User, Playset
+from backend.app.db.models import Server, User, Playset
 
 
 @pytest.mark.asyncio

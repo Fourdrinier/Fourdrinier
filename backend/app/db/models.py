@@ -10,9 +10,9 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
-from sqlalchemy import Table, Boolean, Column, Integer, String, ForeignKey
+from sqlalchemy import Table, Boolean, Column, String, ForeignKey
 from sqlalchemy.orm import relationship
-from app.db.session import Base
+from backend.app.db.session import Base
 
 
 # Association table for many-to-many relationship between Playsets and Servers

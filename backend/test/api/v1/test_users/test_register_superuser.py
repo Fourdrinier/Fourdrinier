@@ -15,7 +15,7 @@ from fastapi.testclient import TestClient
 
 from sqlalchemy import select
 
-from app.db.models import User
+from backend.app.db.models import User
 
 
 @pytest.mark.asyncio

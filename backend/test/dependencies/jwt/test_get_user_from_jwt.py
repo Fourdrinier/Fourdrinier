@@ -19,13 +19,13 @@ from datetime import datetime, timedelta
 import base64
 import json
 
-from app.app import app
-from app.dependencies.jwt.generate_jwt import generate_jwt
-from app.dependencies.jwt.get_user_from_jwt import get_user_from_jwt
-from app.dependencies.jwt.get_secret_key import get_secret_key
-from app.dependencies.jwt.get_jwt_expiration import get_jwt_expiration_time
+from backend.app.app import app
+from backend.app.dependencies.jwt.generate_jwt import generate_jwt
+from backend.app.dependencies.jwt.get_user_from_jwt import get_user_from_jwt
+from backend.app.dependencies.jwt.get_secret_key import get_secret_key
+from backend.app.dependencies.jwt.get_jwt_expiration import get_jwt_expiration_time
 
-from app.db.session import get_db
+from backend.app.db.session import get_db
 
 
 @pytest.mark.asyncio

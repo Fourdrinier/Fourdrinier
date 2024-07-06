@@ -7,7 +7,7 @@ All endpoints for servers
 
 Copyright (C) 2024 by Ethan Brown
 All rights reserved. This file is part of the Fourdrinier project and is released under
-the MIT License. See the LICENSE file for more details.
+the GPLv3 License. See the LICENSE file for more details.
 """
 
 import logging
@@ -18,15 +18,15 @@ from sqlalchemy import Result, select
 from sqlalchemy.orm import selectinload
 from typing import Sequence
 
-from app.db.session import get_db
-from app.db.models import Server, User
-from app.db.schema import ServerCreate, ServerResponse
-from app.db.generate_id import generate_id
+from backend.app.db.session import get_db
+from backend.app.db.models import Server, User
+from backend.app.db.schema import ServerCreate, ServerResponse
+from backend.app.db.generate_id import generate_id
 
-from app.dependencies.config.get_config import get_config
-from app.dependencies.jwt.validate_user import validate_user
+from backend.app.dependencies.config.get_config import get_config
+from backend.app.dependencies.jwt.validate_user import validate_user
 
-from app.db.crud import get_servers
+from backend.app.db.crud import get_servers
 
 # Create a new FastAPI router
 router = APIRouter()

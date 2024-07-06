@@ -12,7 +12,7 @@ the GPLv3 License. See the LICENSE file for more details.
 
 import pytest
 
-from app.db.models import Server
+from backend.app.db.models import Server
 
 
 @pytest.mark.asyncio

@@ -14,7 +14,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from app.db.models import Server
+from backend.app.db.models import Server
 
 
 @pytest.mark.asyncio

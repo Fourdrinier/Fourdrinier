@@ -13,7 +13,7 @@ the GPLv3 License. See the LICENSE file for more details.
 import pytest
 import os
 import secrets
-from app.dependencies.jwt.get_secret_key import get_secret_key
+from backend.app.dependencies.jwt.get_secret_key import get_secret_key
 
 
 @pytest.mark.asyncio

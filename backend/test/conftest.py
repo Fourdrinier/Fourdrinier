@@ -19,14 +19,14 @@ from sqlalchemy.orm import sessionmaker
 from passlib.context import CryptContext
 from fastapi.testclient import TestClient
 
-from app.db.models import Base, User
-from app.db.session import get_db
-from app.app import app
+from backend.app.db.models import Base, User
+from backend.app.db.session import get_db
+from backend.app.app import app
 
-from app.dependencies.registration_token.registration_token import (
+from backend.app.dependencies.registration_token.registration_token import (
     generate_registration_token,
 )
-from app.dependencies.jwt.generate_jwt import generate_jwt
+from backend.app.dependencies.jwt.generate_jwt import generate_jwt
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 TEST_STORAGE = "/tmp/fourdrinier"

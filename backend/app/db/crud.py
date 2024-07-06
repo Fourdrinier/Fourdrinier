@@ -14,7 +14,7 @@ from typing import Sequence, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy import Result
-from app.db.models import Server
+from backend.app.db.models import Server
 
 
 async def get_servers(db: AsyncSession) -> Sequence[Server]:

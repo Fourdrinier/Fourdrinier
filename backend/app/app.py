@@ -7,15 +7,15 @@ Main application file for the Fourdrinier project
 
 Copyright (C) 2024 by Ethan Brown
 All rights reserved. This file is part of the Fourdrinier project and is released under
-the MIT License. See the LICENSE file for more details.
+the GPLv3 License. See the LICENSE file for more details.
 """
 
 from fastapi import FastAPI
-from app.api.v1.servers import router as servers_router
-from app.api.v1.users import router as users_router
-from app.api.v1.playsets import router as playsets_router
+from backend.app.api.v1.servers import router as servers_router
+from backend.app.api.v1.users import router as users_router
+from backend.app.api.v1.playsets import router as playsets_router
 
-from app.dependencies.registration_token.registration_token import (
+from backend.app.dependencies.registration_token.registration_token import (
     generate_registration_token,
 )
 import os
