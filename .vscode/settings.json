@@ -7,5 +7,8 @@
     "python.analysis.inlayHints.variableTypes": true,
     "python.analysis.extraPaths": [
         "${workspaceFolder}/backend/app/db/models",
-    ]
+    ],
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportRedeclaration": "none"
+    }
 }

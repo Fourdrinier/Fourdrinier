@@ -27,6 +27,7 @@ from backend.app.dependencies.config.get_config import get_config
 from backend.app.dependencies.jwt.validate_user import validate_user
 
 from backend.app.db.crud import crud_get_servers
+from backend.app.db.crud import crud_create_server
 
 # Create a new FastAPI router
 router = APIRouter()
@@ -49,37 +50,24 @@ async def list_servers(db: AsyncSession = Depends(get_db)):
 
 @router.post("/", status_code=201, response_model=ServerResponse)
 async def create_server(
-    server: ServerCreate,
+    server_input: ServerCreate,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(validate_user),
 ):
     """
     Create a new server
     """
-    # Create a new server object
-    new_server = Server(**server.model_dump(), id=generate_id())
 
     # Validate the loader
-    if new_server.loader not in config["loaders"]:
+    if server_input.loader not in config["loaders"]:
         raise HTTPException(status_code=400, detail="Invalid loader")
 
     # Validate the game version
-    if new_server.game_version not in config["supported_versions"]:
+    if server_input.game_version not in config["supported_versions"]:
         raise HTTPException(status_code=400, detail="Unsupported game version")
 
-    # Get the user object and add the server to the user's list of servers
-    stmt = (
-        select(User)
-        .options(selectinload(User.servers))
-        .filter_by(username=user.username)
-    )
-    result = await db.execute(stmt)
-    user = result.scalars().first()
-    user.servers.append(new_server)
-
-    # Save the server to the database
-    await db.commit()
-    await db.refresh(new_server)
+    # Commit the new server to the database
+    new_server: Server = await crud_create_server(db, server_input, user)
 
     return new_server
 
