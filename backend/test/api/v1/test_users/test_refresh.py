@@ -45,7 +45,7 @@ async def test_refresh_000_nominal(
         "refresh_token": seed_user.refresh_token,
         "client_id": seed_user.username,
     }
-    response = client.post("/api/v1/users/refresh", params=query_params)
+    response = await client.post("/api/v1/users/refresh", params=query_params)
     assert response.status_code == 200
     response_data = response.json()
 
@@ -74,7 +74,7 @@ async def test_refresh_001_anomalous_no_token(monkeypatch, client, test_db, seed
 
     # Make the request
     query_params = {"client_id": seed_user.username}
-    response = client.post("/api/v1/users/refresh", params=query_params)
+    response = await client.post("/api/v1/users/refresh", params=query_params)
 
     # Ensure that the request failed
     assert response.status_code == 422
@@ -115,7 +115,7 @@ async def test_refresh_002_anomalous_no_username(
 
     # Make the request
     query_params = {"refresh_token": seed_user.refresh_token}
-    response = client.post("/api/v1/users/refresh", params=query_params)
+    response = await client.post("/api/v1/users/refresh", params=query_params)
 
     # Ensure that the request failed
     assert response.status_code == 422
@@ -159,7 +159,7 @@ async def test_refresh_003_anomalous_invalid_username(
         "client_id": "invalid-user",
         "refresh_token": seed_user.refresh_token,
     }
-    response = client.post("/api/v1/users/refresh", params=query_params)
+    response = await client.post("/api/v1/users/refresh", params=query_params)
 
     # Ensure that the request failed
     assert response.status_code == 401
@@ -192,7 +192,7 @@ async def test_refresh_004_anomalous_invalid_token(
 
     # Make the request
     query_params = {"client_id": seed_user.username, "refresh_token": "invalid-token"}
-    response = client.post("/api/v1/users/refresh", params=query_params)
+    response = await client.post("/api/v1/users/refresh", params=query_params)
 
     # Ensure that the request failed
     assert response.status_code == 401
@@ -225,7 +225,7 @@ async def test_refresh_005_anomalous_invalid_username_and_token(
 
     # Make the request
     query_params = {"client_id": "invalid-user", "refresh_token": "invalid-token"}
-    response = client.post("/api/v1/users/refresh", params=query_params)
+    response = await client.post("/api/v1/users/refresh", params=query_params)
 
     # Ensure that the request failed
     assert response.status_code == 401

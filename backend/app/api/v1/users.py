@@ -29,7 +29,7 @@ router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-@router.post("/superuser", status_code=201)
+@router.post("/superuser/", status_code=201)
 async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     """
     Register a new superuser

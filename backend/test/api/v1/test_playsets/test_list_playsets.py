@@ -26,7 +26,7 @@ async def test_list_playsets_000_nominal_no_playsets(client, test_jwt_superuser)
     Result: HTTP 200 - Empty list returned
     """
     # Make a request to the playsets endpoint
-    response = client.get(
+    response = await client.get(
         "/api/v1/playsets/", headers={"Authorization": f"Bearer {test_jwt_superuser}"}
     )
 
@@ -60,7 +60,7 @@ async def test_list_playsets_001_nominal_no_playsets_available(
     await test_db.commit()
 
     # Make a request to the playsets endpoint as test-user
-    response = client.get(
+    response = await client.get(
         "/api/v1/playsets/", headers={"Authorization": f"Bearer {test_jwt}"}
     )
 
@@ -94,7 +94,7 @@ async def test_list_playsets_002_nominal_admin_views_private(
     await test_db.commit()
 
     # Make a request to the playsets endpoint as test-user
-    response = client.get(
+    response = await client.get(
         "/api/v1/playsets/", headers={"Authorization": f"Bearer {test_jwt_superuser}"}
     )
 
@@ -146,7 +146,7 @@ async def test_list_playsets_003_nominal_user1_views_user2_public(
     await test_db.commit()
 
     # Make a request to the playsets endpoint as test-user1
-    response = client.get(
+    response = await client.get(
         "/api/v1/playsets/", headers={"Authorization": f"Bearer {test_jwt}"}
     )
 

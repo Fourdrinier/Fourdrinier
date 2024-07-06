@@ -25,7 +25,7 @@ async def test_create_server_000_nominal(client, test_db, test_jwt):
     Result: HTTP 201 - Server object returned
     """
     # Make a request to the server endpoint
-    response = client.post(
+    response = await client.post(
         "/api/v1/servers/",
         headers={"Authorization": f"Bearer {test_jwt}"},
         json={"name": "Test Server", "loader": "paper", "game_version": "1.20.0"},
@@ -56,7 +56,7 @@ async def test_create_server_001_anomalous_unauthorized(client, test_db):
     Result: HTTP 401 - Unauthorized
     """
     # Make a request to the server endpoint
-    response = client.post(
+    response = await client.post(
         "/api/v1/servers/",
         json={"name": "Test Server", "loader": "paper", "game_version": "1.20"},
     )
@@ -79,7 +79,7 @@ async def test_create_server_002_anomalous_invalid_loader(client, test_db, test_
     Result: HTTP 400 - "Invalid loader"
     """
     # Make a request to the server endpoint
-    response = client.post(
+    response = await client.post(
         "/api/v1/servers/",
         headers={"Authorization": f"Bearer {test_jwt}"},
         json={"name": "Test Server", "loader": "invalid", "game_version": "1.20.0"},
@@ -105,7 +105,7 @@ async def test_create_server_003_anomalous_invalid_game_version(
     Result: HTTP 400 - Validation error
     """
     # Make a request to the server endpoint
-    response = client.post(
+    response = await client.post(
         "/api/v1/servers/",
         headers={"Authorization": f"Bearer {test_jwt}"},
         json={"name": "Test Server", "loader": "paper", "game_version": "invalid"},
@@ -133,7 +133,7 @@ async def test_create_server_004_anomalous_unsupported_game_version(
     Result: HTTP 400 - "Unsupported game version"
     """
     # Make a request to the server endpoint
-    response = client.post(
+    response = await client.post(
         "/api/v1/servers/",
         headers={"Authorization": f"Bearer {test_jwt}"},
         json={"name": "Test Server", "loader": "paper", "game_version": "2.0.0"},

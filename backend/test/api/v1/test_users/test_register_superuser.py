@@ -28,7 +28,7 @@ async def test_register_superuser_000_nominal_superuser(
     Result: HTTP 201: Superuser created
     """
     monkeypatch.setenv("REGISTRATION_TOKEN", test_reg_token)
-    response = client.post(
+    response = await client.post(
         "/api/v1/users/superuser/",
         json={
             "username": "test_user",
@@ -61,7 +61,7 @@ async def test_register_superuser_001_anomalous_superuser_present(
 
     # Attempt to create a new superuser
     monkeypatch.setenv("REGISTRATION_TOKEN", test_reg_token)
-    response = client.post(
+    response = await client.post(
         "/api/v1/users/superuser/",
         json={
             "username": "test_user2",
@@ -90,7 +90,7 @@ async def test_register_superuser_002_anomalous_no_registration_token(
     """
     # Attempt to create a superuser without a registration token
     monkeypatch.setenv("REGISTRATION_TOKEN", test_reg_token)
-    response = client.post(
+    response = await client.post(
         "/api/v1/users/superuser/",
         json={"username": "test_user", "password": "test_password"},
     )
@@ -118,7 +118,7 @@ async def test_register_superuser_003_anomalous_invalid_registration_token(
     """
     # Attempt to create a superuser with an invalid registration token
     monkeypatch.setenv("REGISTRATION_TOKEN", test_reg_token)
-    response = client.post(
+    response = await client.post(
         "/api/v1/users/superuser/",
         json={
             "username": "test_user",

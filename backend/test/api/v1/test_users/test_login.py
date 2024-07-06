@@ -32,7 +32,7 @@ async def test_login_000_nominal(
     Result: HTTP 200 - JWT and refresh token returned
     """
     # Make the request
-    response = client.post(
+    response = await client.post(
         "/api/v1/users/login", json={"username": "test-user", "password": "password"}
     )
     assert response.status_code == 200
@@ -64,7 +64,7 @@ async def test_login_001_no_username_provided(monkeypatch, client, test_db, seed
     Result: HTTP 400 - {Pydantic error}
     """
     # Make the request
-    response = client.post("/api/v1/users/login", json={"password": "password"})
+    response = await client.post("/api/v1/users/login", json={"password": "password"})
     assert response.status_code == 422
     response_data = response.json()
     assert response_data == {
@@ -99,7 +99,7 @@ async def test_login_002_anomalous_no_password_provided(
     Result: HTTP 400 - {Pydantic error}
     """
     # Make the request
-    response = client.post("/api/v1/users/login", json={"username": "test-user"})
+    response = await client.post("/api/v1/users/login", json={"username": "test-user"})
     assert response.status_code == 422
     response_data = response.json()
     assert response_data == {
@@ -134,7 +134,7 @@ async def test_login_003_anomalous_nonexistent_user(
     Result: HTTP 401 - "The provided credentials were incorrect"
     """
     # Make the request
-    response = client.post(
+    response = await client.post(
         "/api/v1/users/login", json={"username": "test-user2", "password": "password"}
     )
     assert response.status_code == 401
@@ -161,7 +161,7 @@ async def test_login_004_anomalous_incorrect_password(
     Result: HTTP 401 - "The provided credentials were incorrect"
     """
     # Make the request
-    response = client.post(
+    response = await client.post(
         "/api/v1/users/login", json={"username": "test-user", "password": "password2"}
     )
     assert response.status_code == 401

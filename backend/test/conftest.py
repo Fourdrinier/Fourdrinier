@@ -17,7 +17,8 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from passlib.context import CryptContext
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
+from httpx import ASGITransport
 
 from backend.app.db.models import Base, User
 from backend.app.db.session import get_db
@@ -89,7 +90,9 @@ async def client(monkeypatch, test_db):
 
     app.dependency_overrides[get_db] = override_get_db
 
-    with TestClient(app) as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         yield client
 
 
