@@ -17,7 +17,7 @@ from sqlalchemy import Result
 from backend.app.db.models import Server
 
 
-async def get_servers(db: AsyncSession) -> Sequence[Server]:
+async def crud_get_servers(db: AsyncSession) -> Sequence[Server]:
     """
     Get all servers
     """

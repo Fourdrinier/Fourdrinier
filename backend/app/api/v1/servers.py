@@ -26,7 +26,7 @@ from backend.app.db.generate_id import generate_id
 from backend.app.dependencies.config.get_config import get_config
 from backend.app.dependencies.jwt.validate_user import validate_user
 
-from backend.app.db.crud import get_servers
+from backend.app.db.crud import crud_get_servers
 
 # Create a new FastAPI router
 router = APIRouter()
@@ -43,7 +43,7 @@ async def list_servers(db: AsyncSession = Depends(get_db)):
     """
     List all servers
     """
-    servers: Sequence[Server] = await get_servers(db)
+    servers: Sequence[Server] = await crud_get_servers(db)
     return servers
 
 
