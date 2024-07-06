@@ -16,17 +16,15 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import secrets
-from passlib.context import CryptContext
 
 from backend.app.db.models import User
 from backend.app.db.schema import UserCreate, UserLogin
 from backend.app.db.session import get_db
 
 from backend.app.dependencies.jwt.generate_jwt import generate_jwt
+from backend.app.dependencies.core.auth import verify_password, get_password_hash
 
 router = APIRouter()
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @router.post("/superuser/", status_code=201)
@@ -50,7 +48,7 @@ async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid registration token")
 
     # Hash the password
-    hashed_password = pwd_context.hash(user.password)
+    hashed_password: str = await get_password_hash(user.password)
 
     # Create the user
     user_object = User(
@@ -83,7 +81,7 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
         )
 
     # Check the password
-    if not pwd_context.verify(user.password, user_object.hashed_password):
+    if not await verify_password(user.password, str(user_object.hashed_password)):
         raise HTTPException(
             status_code=401, detail="The provided credentials were incorrect"
         )

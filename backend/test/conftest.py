@@ -13,10 +13,11 @@ the GPLv3 License. See the LICENSE file for more details.
 import os
 import shutil
 import secrets
+from typing import Generator
 import pytest_asyncio
+import bcrypt
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from passlib.context import CryptContext
 from httpx import AsyncClient
 from httpx import ASGITransport
 
@@ -28,12 +29,12 @@ from backend.app.dependencies.registration_token.registration_token import (
     generate_registration_token,
 )
 from backend.app.dependencies.jwt.generate_jwt import generate_jwt
+from backend.app.dependencies.core.auth import verify_password, get_password_hash
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 TEST_STORAGE = "/tmp/fourdrinier"
 
 test_secret_key = secrets.token_hex(32)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
@@ -108,10 +109,11 @@ async def test_reg_token(monkeypatch, test_storage):
 
 
 @pytest_asyncio.fixture(scope="function")
-async def seed_user(monkeypatch, test_db):
-    hashed_password = pwd_context.hash("password")
+async def seed_user(test_db: AsyncSession):
     user = User(
-        username="test-user", hashed_password=hashed_password, refresh_token=None
+        username="test-user",
+        hashed_password=await get_password_hash("password"),
+        refresh_token=None,
     )
     test_db.add(user)
     await test_db.commit()
@@ -120,10 +122,11 @@ async def seed_user(monkeypatch, test_db):
 
 
 @pytest_asyncio.fixture(scope="function")
-async def seed_user2(monkeypatch, test_db):
-    hashed_password = pwd_context.hash("password")
+async def seed_user2(test_db: AsyncSession):
     user = User(
-        username="test-user2", hashed_password=hashed_password, refresh_token=None
+        username="test-user2",
+        hashed_password=await get_password_hash("password"),
+        refresh_token=None,
     )
     test_db.add(user)
     await test_db.commit()
@@ -132,11 +135,10 @@ async def seed_user2(monkeypatch, test_db):
 
 
 @pytest_asyncio.fixture(scope="function")
-async def seed_superuser(monkeypatch, test_db):
-    hashed_password = pwd_context.hash("password")
+async def seed_superuser(test_db):
     user = User(
         username="admin",
-        hashed_password=hashed_password,
+        hashed_password=await get_password_hash("password"),
         refresh_token=None,
         is_superuser=True,
     )
