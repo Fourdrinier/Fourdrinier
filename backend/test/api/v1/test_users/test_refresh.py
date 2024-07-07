@@ -15,7 +15,7 @@ import pytest
 
 from fastapi.testclient import TestClient
 
-from backend.app.dependencies.jwt.generate_jwt import generate_jwt
+from backend.app.dependencies.core.auth.generate_jwt import generate_jwt
 
 
 @pytest.mark.asyncio

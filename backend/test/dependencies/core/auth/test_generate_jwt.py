@@ -15,7 +15,7 @@ import jwt
 import secrets
 
 from backend.app.dependencies.jwt.get_secret_key import get_secret_key
-from backend.app.dependencies.jwt.generate_jwt import generate_jwt
+from backend.app.dependencies.core.auth.generate_jwt import generate_jwt
 
 
 @pytest.mark.asyncio

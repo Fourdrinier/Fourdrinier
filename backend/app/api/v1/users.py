@@ -21,7 +21,7 @@ from backend.app.db.models import User
 from backend.app.db.schema import UserCreate, UserLogin
 from backend.app.db.session import get_db
 
-from backend.app.dependencies.jwt.generate_jwt import generate_jwt
+from backend.app.dependencies.core.auth.generate_jwt import generate_jwt
 from backend.app.dependencies.core.auth.verify_password import verify_password
 from backend.app.dependencies.core.auth.get_password_hash import get_password_hash
 
