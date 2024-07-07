@@ -22,8 +22,8 @@ import json
 from backend.app.app import app
 from backend.app.dependencies.core.auth.generate_jwt import generate_jwt
 from backend.app.dependencies.core.auth.get_user_from_jwt import get_user_from_jwt
-from backend.app.dependencies.jwt.get_secret_key import get_secret_key
-from backend.app.dependencies.jwt.get_jwt_expiration import get_jwt_expiration_time
+from backend.app.dependencies.core.jwt.get_secret_key import get_secret_key
+from backend.app.dependencies.core.jwt.get_jwt_expiration import get_jwt_expiration_time
 
 from backend.app.db.session import get_db
 

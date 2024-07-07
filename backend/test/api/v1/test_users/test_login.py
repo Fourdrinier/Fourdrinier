@@ -15,7 +15,7 @@ from sqlalchemy import select
 
 from backend.app.db.models import User
 
-from backend.app.dependencies.jwt.get_secret_key import get_secret_key
+from backend.app.dependencies.core.jwt.get_secret_key import get_secret_key
 
 
 @pytest.mark.asyncio

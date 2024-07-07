@@ -11,7 +11,7 @@ the GPLv3 License. See the LICENSE file for more details.
 """
 
 import pytest
-from backend.app.dependencies.jwt.get_jwt_expiration import get_jwt_expiration_time
+from backend.app.dependencies.core.jwt.get_jwt_expiration import get_jwt_expiration_time
 
 
 @pytest.mark.asyncio
