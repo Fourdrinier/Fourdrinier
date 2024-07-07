@@ -22,7 +22,7 @@ from backend.app.db.schema import PlaysetResponse
 from backend.app.db.generate_id import generate_id
 
 from backend.app.dependencies.config.get_config import get_config
-from backend.app.dependencies.jwt.validate_user import validate_user
+from backend.app.dependencies.core.auth.validate_user import validate_user
 
 
 # Create a new FastAPI router
