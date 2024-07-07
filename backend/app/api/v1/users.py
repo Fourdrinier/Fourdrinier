@@ -22,7 +22,8 @@ from backend.app.db.schema import UserCreate, UserLogin
 from backend.app.db.session import get_db
 
 from backend.app.dependencies.jwt.generate_jwt import generate_jwt
-from backend.app.dependencies.core.auth import verify_password, get_password_hash
+from backend.app.dependencies.core.auth.verify_password import verify_password
+from backend.app.dependencies.core.auth.get_password_hash import get_password_hash
 
 router = APIRouter()
 

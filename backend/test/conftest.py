@@ -29,7 +29,7 @@ from backend.app.dependencies.registration_token.registration_token import (
     generate_registration_token,
 )
 from backend.app.dependencies.jwt.generate_jwt import generate_jwt
-from backend.app.dependencies.core.auth import verify_password, get_password_hash
+from backend.app.dependencies.core.auth.get_password_hash import get_password_hash
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 TEST_STORAGE = "/tmp/fourdrinier"

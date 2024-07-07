@@ -1,9 +1,9 @@
 """
-auth.py
+verify_password.py
 
 @Author: Ethan Brown - ethan@ewbrowntech.com
 
-Contains dependencies for authentication
+Contains dependencies for verifying passwords
 
 Copyright (C) 2024 by Ethan Brown
 All rights reserved. This file is part of the Fourdrinier project and is released under
@@ -20,13 +20,3 @@ async def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(
         plain_password.encode("utf-8"), hashed_password.encode("utf-8")
     )
-
-
-async def get_password_hash(password: str) -> str:
-    """
-    Get a hashed password
-    """
-    hashed_password: str = bcrypt.hashpw(
-        password.encode("utf-8"), bcrypt.gensalt()
-    ).decode("utf-8")
-    return hashed_password
