@@ -14,7 +14,7 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.dependencies.jwt.get_user_from_jwt import get_user_from_jwt
+from backend.app.dependencies.core.auth.get_user_from_jwt import get_user_from_jwt
 
 from backend.app.db.models import User
 from backend.app.db.session import get_db
