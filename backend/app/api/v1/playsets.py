@@ -21,7 +21,7 @@ from backend.app.db.models import Playset, User
 from backend.app.db.schema import PlaysetResponse
 from backend.app.db.generate_id import generate_id
 
-from backend.app.dependencies.config.get_config import get_config
+from backend.app.dependencies.core.config.get_config import get_config
 from backend.app.dependencies.core.auth.validate_user import validate_user
 
 

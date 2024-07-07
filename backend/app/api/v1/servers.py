@@ -24,7 +24,7 @@ from backend.app.db.generate_id import generate_id
 
 from backend.app.db.session import get_db
 
-from backend.app.dependencies.config.get_config import get_config
+from backend.app.dependencies.core.config.get_config import get_config
 from backend.app.dependencies.core.auth.validate_user import validate_user
 
 from backend.app.db.crud import crud_get_servers

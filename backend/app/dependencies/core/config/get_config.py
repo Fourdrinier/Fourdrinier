@@ -16,7 +16,9 @@ import json
 
 def get_config():
     config_filepath = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
+        os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+        ),
         "config.json",
     )
 
