@@ -10,24 +10,21 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
+from fastapi import APIRouter, Depends, HTTPException
 import logging
 from typing import Tuple, Any
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import Result, select
-from sqlalchemy.orm import selectinload
-from typing import Sequence
 
+from sqlalchemy import Result, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+import backend.app.db.crud as crud
 from backend.app.db.models import Server, User
 from backend.app.db.schema import ServerCreate, ServerResponse
-from backend.app.db.generate_id import generate_id
-
 from backend.app.db.session import get_db
 
 from backend.app.dependencies.core.config.get_config import get_config
 from backend.app.dependencies.core.auth.validate_user import validate_user
 
-import backend.app.db.crud as crud
 
 # Create a new FastAPI router
 router = APIRouter()
