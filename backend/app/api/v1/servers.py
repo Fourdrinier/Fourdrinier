@@ -27,8 +27,7 @@ from backend.app.db.session import get_db
 from backend.app.dependencies.core.config.get_config import get_config
 from backend.app.dependencies.core.auth.validate_user import validate_user
 
-from backend.app.db.crud import crud_get_servers
-from backend.app.db.crud import crud_create_server
+import backend.app.db.crud as crud
 
 # Create a new FastAPI router
 router = APIRouter()
@@ -45,7 +44,7 @@ async def list_servers(db: AsyncSession = Depends(get_db)):
     """
     List all servers
     """
-    servers: Sequence[Server] = await crud_get_servers(db)
+    servers: Sequence[Server] = await crud.get_servers(db)
     return servers
 
 
@@ -68,7 +67,7 @@ async def create_server(
         raise HTTPException(status_code=400, detail="Unsupported game version")
 
     # Commit the new server to the database
-    new_server: Server = await crud_create_server(db, server_input, user)
+    new_server: Server = await crud.create_server(db, server_input, user)
 
     return new_server
 

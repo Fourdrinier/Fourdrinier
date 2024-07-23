@@ -14,7 +14,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from httpx import AsyncClient
 
-from backend.app.db.crud import crud_get_servers
+import backend.app.db.crud as crud
 from backend.app.db.models import Server
 
 
@@ -28,7 +28,7 @@ async def test_crud_get_servers_000_nominal_no_servers(
     Result: []
     """
     # Ensure that an empty list is returned
-    assert await crud_get_servers(test_db) == []
+    assert await crud.get_servers(test_db) == []
 
 
 @pytest.mark.asyncio
@@ -48,4 +48,4 @@ async def test_crud_get_servers_001_nominal_one_server(
     await test_db.commit()
 
     # Ensure that the server is returned
-    assert await crud_get_servers(test_db) == [seed_server]
+    assert await crud.get_servers(test_db) == [seed_server]

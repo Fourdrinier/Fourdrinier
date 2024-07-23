@@ -13,6 +13,7 @@ the GPLv3 License. See the LICENSE file for more details.
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 import jwt
 from jwt.exceptions import DecodeError, InvalidAlgorithmError, ExpiredSignatureError
@@ -45,7 +46,9 @@ async def get_user_from_jwt(token: str, db: AsyncSession) -> User:
         raise HTTPException(status_code=401, detail="Invalid bearer token")
 
     # Get the user from the database
-    user = await db.get(User, username)
+    user: User | None = await db.get(
+        User, username, options=[selectinload(User.servers)]
+    )
     if user is None:
         raise HTTPException(status_code=401, detail="Invalid bearer token")
 
