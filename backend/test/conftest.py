@@ -166,23 +166,35 @@ async def test_jwt_expiration_time(
 
 @pytest_asyncio.fixture(scope="function")  # type: ignore
 async def test_jwt(
-    seed_user: User, test_jwt_secret_key: str, test_jwt_expiration_time: str
+    test_db: AsyncSession,
+    seed_user: User,
+    test_jwt_secret_key: str,
+    test_jwt_expiration_time: str,
 ) -> AsyncGenerator[str, None]:
+    await test_db.refresh(seed_user)
     jwt: str = generate_jwt(str(seed_user.username))
     yield jwt
 
 
 @pytest_asyncio.fixture(scope="function")  # type: ignore
 async def test_jwt_user2(
-    seed_user2: User, test_jwt_secret_key: str, test_jwt_expiration_time: str
+    test_db: AsyncSession,
+    seed_user2: User,
+    test_jwt_secret_key: str,
+    test_jwt_expiration_time: str,
 ) -> AsyncGenerator[str, None]:
+    await test_db.refresh(seed_user2)
     jwt: str = generate_jwt(str(seed_user2.username))
     yield jwt
 
 
 @pytest_asyncio.fixture(scope="function")  # type: ignore
 async def test_jwt_superuser(
-    seed_superuser: User, test_jwt_secret_key: str, test_jwt_expiration_time: str
+    test_db: AsyncSession,
+    seed_superuser: User,
+    test_jwt_secret_key: str,
+    test_jwt_expiration_time: str,
 ) -> AsyncGenerator[str, None]:
-    jwt = generate_jwt(str(seed_superuser.username))
+    await test_db.refresh(seed_superuser)
+    jwt: str = generate_jwt(str(seed_superuser.username))
     yield jwt

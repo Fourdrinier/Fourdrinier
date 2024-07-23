@@ -21,6 +21,10 @@ build:
 build_test:
 	docker-compose $(TEST_CONFIG) build backend
 
+cleanup:
+	- docker-compose $(PROD_CONFIG) down -v
+	- docker-compose $(TEST_CONFIG) down -v
+
 test: prepare_cache build_test
 	- docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/backend/app/alembic/versions --volume $(PWD)/.pytest_cache:/fourdrinier/.pytest_cache backend python -m pytest
 	docker-compose $(TEST_CONFIG) down -v
