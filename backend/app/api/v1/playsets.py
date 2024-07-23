@@ -14,12 +14,11 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
+import backend.app.db.crud as crud
 from backend.app.db.session import get_db
 from backend.app.db.models import Playset, User
 from backend.app.db.schema import PlaysetResponse
-from backend.app.db.generate_id import generate_id
 
 from backend.app.dependencies.core.config.get_config import get_config
 from backend.app.dependencies.core.auth.validate_user import validate_user
@@ -29,27 +28,16 @@ from backend.app.dependencies.core.auth.validate_user import validate_user
 router = APIRouter()
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 @router.get("/", status_code=200, response_model=list[PlaysetResponse])
 async def list_playsets(
     db: AsyncSession = Depends(get_db), user: User = Depends(validate_user)
-):
+) -> list[PlaysetResponse]:
     """
     List all playsets
     """
-    # If the user is a superuser, get all playsets
-    stmt = select(Playset)
+    playsets: list[Playset] = await crud.list_playsets_by_user(db, user)
 
-    # If the user is not a superuser, filter the playsets
-    if not user.is_superuser:
-        stmt = stmt.where(
-            (Playset.owner_username == user.username) | (Playset.is_private == False)
-        )
-
-    # Get the applicable playsets
-    result = await db.execute(stmt)
-    playsets = result.scalars().all()
-
-    return playsets
+    return [PlaysetResponse.model_validate(playset.__dict__) for playset in playsets]

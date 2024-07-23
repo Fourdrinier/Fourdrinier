@@ -10,9 +10,9 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
-from typing import Sequence, Tuple
+from typing import Tuple
 
-from sqlalchemy import select
+from sqlalchemy import Select, select
 from sqlalchemy import Result
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +21,7 @@ from sqlalchemy.orm import selectinload
 from backend.app.db.generate_id import generate_id
 from backend.app.db.models import Server
 from backend.app.db.models import User
+from backend.app.db.models import Playset
 from backend.app.db.schema import ServerCreate
 
 
@@ -109,3 +110,31 @@ async def create_user(
         raise e
 
     return user
+
+
+async def list_playsets(db: AsyncSession) -> list[Playset]:
+    """
+    List all playsets
+    """
+    result: Result[Tuple[Playset]] = await db.execute(select(Playset))
+    playsets: list[Playset] = list(result.scalars().all())
+    return playsets
+
+
+async def list_playsets_by_user(db: AsyncSession, user: User) -> list[Playset]:
+    """
+    List all playsets by a user
+    """
+    stmt = select(Playset)
+
+    # If the user is not a superuser, filter the playsets
+    if not user.is_superuser:  # type: ignore
+        stmt: Select[Tuple[Playset]] = stmt.where(
+            (Playset.owner_username == user.username) | (Playset.is_private.is_(False))
+        )
+
+    # Get the applicable playsets
+    result: Result[Tuple[Playset]] = await db.execute(stmt)
+    playsets: list[Playset] = list(result.scalars().all())
+
+    return playsets

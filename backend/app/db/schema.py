@@ -10,7 +10,7 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 
 
@@ -87,6 +87,7 @@ class UserLogin(BaseModel):
 
 
 class PlaysetResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     name: str
     description: str
