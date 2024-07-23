@@ -92,3 +92,14 @@ class PlaysetResponse(BaseModel):
     description: str
     owner_username: str
     is_private: bool
+
+
+class RegistrationResponse(BaseModel):
+    username: str
+    is_superuser: bool
+
+
+class LoginResponse(BaseModel):
+    username: str
+    jwt: str
+    refresh_token: str

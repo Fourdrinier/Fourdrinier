@@ -59,6 +59,15 @@ async def create_server(
     return new_server
 
 
+async def list_users(db: AsyncSession) -> list[User]:
+    """
+    List all users
+    """
+    result: Result[Tuple[User]] = await db.execute(select(User))
+    users: list[User] = list(result.scalars().all())
+    return users
+
+
 async def get_user(db: AsyncSession, username: str) -> User:
     """
     Get a user by username
@@ -69,4 +78,34 @@ async def get_user(db: AsyncSession, username: str) -> User:
     user: User | None = result.scalars().first()
     if user is None:
         raise NoResultFound("User not found")
+    return user
+
+
+async def create_user(
+    db: AsyncSession,
+    username: str,
+    hashed_password: str,
+    email: str | None = None,
+    is_superuser: bool = False,
+) -> User:
+    """
+    Create a new user
+    """
+    # Create the user
+    user = User(
+        username=username,
+        email=email,
+        hashed_password=hashed_password,
+        is_superuser=is_superuser,
+    )
+
+    # Commit the new user to the database
+    try:
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+    except Exception as e:
+        await db.rollback()
+        raise e
+
     return user
