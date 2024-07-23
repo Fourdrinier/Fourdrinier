@@ -11,7 +11,7 @@ the GPLv3 License. See the LICENSE file for more details.
 """
 
 import logging
-from typing import Tuple
+from typing import Tuple, Any
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import Result, select
@@ -36,7 +36,7 @@ router = APIRouter()
 logger: logging.Logger = logging.getLogger(__name__)
 
 # Get the configuration
-config = get_config()
+config: Any = get_config()
 
 
 @router.get("/", status_code=200, response_model=list[ServerResponse])
@@ -53,7 +53,7 @@ async def create_server(
     server_input: ServerCreate,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(validate_user),
-):
+) -> Server:
     """
     Create a new server
     """
@@ -72,13 +72,15 @@ async def create_server(
     return new_server
 
 
-@router.get("/{server_id}", status_code=200)
-async def get_server(server_id: str, db: AsyncSession = Depends(get_db)):
+@router.get("/{server_id}", status_code=200, response_model=ServerResponse)
+async def get_server(server_id: str, db: AsyncSession = Depends(get_db)) -> Server:
     """
     Get a server by ID
     """
-    result = await db.execute(select(Server).filter_by(id=server_id))
-    server = result.scalars().first()
+    result: Result[Tuple[Server]] = await db.execute(
+        select(Server).filter_by(id=server_id)
+    )
+    server: Server | None = result.scalars().first()
     if server is None:
         raise HTTPException(status_code=404, detail="Server not found")
     return server
