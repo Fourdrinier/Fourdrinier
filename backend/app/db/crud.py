@@ -24,12 +24,12 @@ from backend.app.db.models import User
 from backend.app.db.schema import ServerCreate
 
 
-async def get_servers(db: AsyncSession) -> Sequence[Server]:
+async def get_servers(db: AsyncSession) -> list[Server]:
     """
     Get all servers
     """
     result: Result[Tuple[Server]] = await db.execute(select(Server))
-    servers: Sequence[Server] = result.scalars().all()
+    servers: list[Server] = list(result.scalars().all())
     return servers
 
 

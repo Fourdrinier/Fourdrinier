@@ -39,12 +39,12 @@ logger: logging.Logger = logging.getLogger(__name__)
 config = get_config()
 
 
-@router.get("/", status_code=200)
-async def list_servers(db: AsyncSession = Depends(get_db)):
+@router.get("/", status_code=200, response_model=list[ServerResponse])
+async def list_servers(db: AsyncSession = Depends(get_db)) -> list[Server]:
     """
     List all servers
     """
-    servers: Sequence[Server] = await crud.get_servers(db)
+    servers: list[Server] = await crud.get_servers(db)
     return servers
 
 
