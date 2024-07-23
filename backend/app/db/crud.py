@@ -11,11 +11,12 @@ the GPLv3 License. See the LICENSE file for more details.
 """
 
 from typing import Sequence, Tuple
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import Select, select
+
+from sqlalchemy import select
 from sqlalchemy import Result
-from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from backend.app.db.generate_id import generate_id
 from backend.app.db.models import Server
