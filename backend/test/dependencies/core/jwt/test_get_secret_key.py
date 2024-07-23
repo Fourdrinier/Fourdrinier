@@ -11,20 +11,21 @@ the GPLv3 License. See the LICENSE file for more details.
 """
 
 import pytest
-import os
 import secrets
 from backend.app.dependencies.core.jwt.get_secret_key import get_secret_key
 
 
 @pytest.mark.asyncio
-async def test_get_secret_key_000_nominal_secret_key(monkeypatch):
+async def test_get_secret_key_000_nominal_secret_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """
     Test 000 - Nominal
     Conditions: Environment variable "JWT_SECRET_KEY" is set as a string
     Result: Secret key string returned
     """
     # Set the environment variable
-    secret_key = secrets.token_hex(32)
+    secret_key: str = secrets.token_hex(32)
     monkeypatch.setenv("JWT_SECRET_KEY", secret_key)
 
     # Ensure that the secret key is returned
@@ -32,7 +33,7 @@ async def test_get_secret_key_000_nominal_secret_key(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_get_secret_key_001_secret_key_var_not_set():
+async def test_get_secret_key_001_secret_key_var_not_set() -> None:
     """
     Test 001 - Anomalous
     Conditions: Environment variable "JWT_SECRET_KEY" is not set
@@ -46,7 +47,9 @@ async def test_get_secret_key_001_secret_key_var_not_set():
 
 
 @pytest.mark.asyncio
-async def test_get_secret_key_002_anomalous_secret_key_var_empty(monkeypatch):
+async def test_get_secret_key_002_anomalous_secret_key_var_empty(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """
     Test 002 - Anomalous
     Conditions: Environment variable "JWT_SECRET_KEY" is an empty string
@@ -57,19 +60,23 @@ async def test_get_secret_key_002_anomalous_secret_key_var_empty(monkeypatch):
 
     # Ensure that the correct exception is raised
     with pytest.raises(EnvironmentError) as e:
-        secret_key = get_secret_key()
+        get_secret_key()
     assert str(e.value) == "The environment variable JWT_SECRET_KEY cannot be empty"
 
 
 @pytest.mark.asyncio
-async def test_get_secret_key_003_anomalous_secret_key_too_short(monkeypatch):
+async def test_get_secret_key_003_anomalous_secret_key_too_short(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """
     Test 003 - Anomalous
-    Conditions: Environment variable "SECRET_KEY" is a string that is < 256 bits (64 characters) long
-    Result: ValueError("Secret key must be at least 256 bits (64 hexadecimal characters) long")
+    Conditions: Environment variable "SECRET_KEY" is a
+                string that is < 256 bits (64 characters) long
+    Result: ValueError("Secret key must be at least 256 bits
+                        (64 hexadecimal characters) long")
     """
     # Set the environment variable
-    secret_key = secrets.token_hex(31)
+    secret_key: str = secrets.token_hex(31)
     monkeypatch.setenv("JWT_SECRET_KEY", secret_key)
 
     # Ensure that the correct exception is raised
@@ -77,5 +84,6 @@ async def test_get_secret_key_003_anomalous_secret_key_too_short(monkeypatch):
         get_secret_key()
     assert (
         str(e.value)
-        == "The environment variable JWT_SECRET_KEY must be at least 256 bits (64 hexadecimal characters) long"
+        == "The environment variable JWT_SECRET_KEY must be at least 256 bits "
+        + "(64 hexadecimal characters) long"
     )
