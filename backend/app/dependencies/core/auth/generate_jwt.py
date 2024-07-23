@@ -16,13 +16,7 @@ from backend.app.dependencies.core.jwt.get_secret_key import get_secret_key
 from backend.app.dependencies.core.jwt.get_jwt_expiration import get_jwt_expiration_time
 
 
-def generate_jwt(username: str, expiration: int = None) -> str:
-    """Generate a JWT token for a user with creation and optional expiration time"""
-    if username is None or username == "" or not isinstance(username, str):
-        raise ValueError(
-            f"'username' must be of type <class 'str'>, not {type(username)}"
-        )
-
+def generate_jwt(username: str, expiration: int | None = None) -> str:
     # Set the expiration time to the provided value or get it from the default function
     if expiration is None:
         expiration = get_jwt_expiration_time()
@@ -31,13 +25,15 @@ def generate_jwt(username: str, expiration: int = None) -> str:
     expiration_time = datetime.utcnow() + timedelta(seconds=expiration)
 
     # Create the payload with the subject, issued at, and expiration time
-    payload = {
+    payload: dict[str, str | datetime] = {
         "sub": username,
         "iat": datetime.utcnow(),  # Issued at time
         "exp": expiration_time,  # Expiration time
     }
 
     # Generate the JWT
-    token = jwt.encode(payload, get_secret_key(), algorithm="HS256")
+    token: str = jwt.encode(  # type: ignore
+        payload, get_secret_key(), algorithm="HS256"
+    )
 
     return token

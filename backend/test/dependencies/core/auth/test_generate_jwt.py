@@ -12,7 +12,7 @@ the GPLv3 License. See the LICENSE file for more details.
 
 import pytest
 import jwt
-import secrets
+from datetime import datetime
 
 from backend.app.dependencies.core.jwt.get_secret_key import get_secret_key
 from backend.app.dependencies.core.auth.generate_jwt import generate_jwt
@@ -20,7 +20,7 @@ from backend.app.dependencies.core.auth.generate_jwt import generate_jwt
 
 @pytest.mark.asyncio
 async def test_generate_jwt_000_nominal(
-    monkeypatch, test_jwt_secret_key, test_jwt_expiration_time
+    test_jwt_secret_key: None, test_jwt_expiration_time: str
 ):
     """
     Test 000 - Nominal
@@ -28,53 +28,10 @@ async def test_generate_jwt_000_nominal(
     Result: JWT returned
     """
     # Generate the JWT
-    token = generate_jwt(username="username")
+    token: str = generate_jwt(username="username")
     assert token
 
     # Ensure that the payload was inserted correctly
-    payload = jwt.decode(token, get_secret_key(), algorithms=["HS256"])
+    payload: str = jwt.decode(token, get_secret_key(), algorithms=["HS256"])  # type: ignore
     username: str = payload.get("sub")
     assert username == "username"
-
-
-@pytest.mark.asyncio
-async def test_generate_jwt_001_anomalous_no_username(monkeypatch):
-    """
-    Test 001 - Anomalous
-    Conditions: username = None
-    Result: ValueError('username' must be of type <class 'str'>, not <class 'NoneType'>)
-    """
-    # Set the secret key environment variable
-    secret_key = secrets.token_hex(32)
-    monkeypatch.setenv("JWT_SECRET_KEY", secret_key)
-
-    # Set the expiration time environment variable
-    monkeypatch.setenv("JWT_EXPIRATION_TIME", "1")
-
-    # Ensure that an exception is raised
-    with pytest.raises(ValueError) as e:
-        jwt = generate_jwt(username=None)
-    assert (
-        str(e.value)
-        == "'username' must be of type <class 'str'>, not <class 'NoneType'>"
-    )
-
-
-@pytest.mark.asyncio
-async def test_generate_jwt_002_anomalous_username_is_not_string(monkeypatch):
-    """
-    Test 002 - Anomalous
-    Conditions: username = 1
-    Result: ValueError('username' must be of type <class 'str'>, not <class 'int'>)
-    """
-    # Set the secret key environment variable
-    secret_key = secrets.token_hex(32)
-    monkeypatch.setenv("JWT_SECRET_KEY", secret_key)
-
-    # Set the expiration time environment variable
-    monkeypatch.setenv("JWT_EXPIRATION_TIME", "1")
-
-    # Ensure that an exception is raised
-    with pytest.raises(ValueError) as e:
-        jwt = generate_jwt(username=1)
-    assert str(e.value) == "'username' must be of type <class 'str'>, not <class 'int'>"
