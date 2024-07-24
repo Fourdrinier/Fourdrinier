@@ -11,24 +11,30 @@ the GPLv3 License. See the LICENSE file for more details.
 """
 
 import pytest
-from fastapi.testclient import TestClient
 
-from sqlalchemy import select
+from httpx import AsyncClient, Response
+from typing import Sequence, Tuple
+
+from sqlalchemy import Result, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.db.models import User
 
 
 @pytest.mark.asyncio
 async def test_register_superuser_000_nominal_superuser(
-    monkeypatch, client, test_db, test_reg_token
-):
+    monkeypatch: pytest.MonkeyPatch,
+    client: AsyncClient,
+    test_db: AsyncSession,
+    test_reg_token: str,
+) -> None:
     """
     Test 000 - Nominal
     Conditions: No users in database
     Result: HTTP 201: Superuser created
     """
     monkeypatch.setenv("REGISTRATION_TOKEN", test_reg_token)
-    response = await client.post(
+    response: Response = await client.post(
         "/api/v1/users/superuser/",
         json={
             "username": "test_user",
@@ -38,16 +44,19 @@ async def test_register_superuser_000_nominal_superuser(
     )
     assert response.status_code == 201
 
-    user = await test_db.get(User, "test_user")
+    user: User | None = await test_db.get(User, "test_user")
     assert user is not None
-    assert user.username == "test_user"
-    assert user.is_superuser
+    assert str(user.username) == "test_user"
+    assert user.is_superuser.is_(True)
 
 
 @pytest.mark.asyncio
 async def test_register_superuser_001_anomalous_superuser_present(
-    monkeypatch, client, test_db, test_reg_token
-):
+    monkeypatch: pytest.MonkeyPatch,
+    client: AsyncClient,
+    test_db: AsyncSession,
+    test_reg_token: str,
+) -> None:
     """
     Test 001 - Existing user
     Conditions: One superuser in database
@@ -61,7 +70,7 @@ async def test_register_superuser_001_anomalous_superuser_present(
 
     # Attempt to create a new superuser
     monkeypatch.setenv("REGISTRATION_TOKEN", test_reg_token)
-    response = await client.post(
+    response: Response = await client.post(
         "/api/v1/users/superuser/",
         json={
             "username": "test_user2",
@@ -74,15 +83,18 @@ async def test_register_superuser_001_anomalous_superuser_present(
     assert response.status_code == 404
 
     # Check that the user was not created
-    user_response = await test_db.execute(select(User))
-    users = user_response.scalars().all()
+    user_response: Result[Tuple[User]] = await test_db.execute(select(User))
+    users: Sequence[User] = user_response.scalars().all()
     assert len(users) == 1
 
 
 @pytest.mark.asyncio
 async def test_register_superuser_002_anomalous_no_registration_token(
-    monkeypatch, client, test_db, test_reg_token
-):
+    monkeypatch: pytest.MonkeyPatch,
+    client: AsyncClient,
+    test_db: AsyncSession,
+    test_reg_token: str,
+) -> None:
     """
     Test 002 - No registration token
     Conditions: No users in database
@@ -90,7 +102,7 @@ async def test_register_superuser_002_anomalous_no_registration_token(
     """
     # Attempt to create a superuser without a registration token
     monkeypatch.setenv("REGISTRATION_TOKEN", test_reg_token)
-    response = await client.post(
+    response: Response = await client.post(
         "/api/v1/users/superuser/",
         json={"username": "test_user", "password": "test_password"},
     )
@@ -102,15 +114,18 @@ async def test_register_superuser_002_anomalous_no_registration_token(
     }
 
     # Check that the user was not created
-    user_response = await test_db.execute(select(User))
-    users = user_response.scalars().all()
+    user_response: Result[Tuple[User]] = await test_db.execute(select(User))
+    users: Sequence[User] = user_response.scalars().all()
     assert len(users) == 0
 
 
 @pytest.mark.asyncio
 async def test_register_superuser_003_anomalous_invalid_registration_token(
-    monkeypatch, client, test_db, test_reg_token
-):
+    monkeypatch: pytest.MonkeyPatch,
+    client: AsyncClient,
+    test_db: AsyncSession,
+    test_reg_token: str,
+) -> None:
     """
     Test 003 - Invalid registration token
     Conditions: Invalid token included in request to register superuser
@@ -118,7 +133,7 @@ async def test_register_superuser_003_anomalous_invalid_registration_token(
     """
     # Attempt to create a superuser with an invalid registration token
     monkeypatch.setenv("REGISTRATION_TOKEN", test_reg_token)
-    response = await client.post(
+    response: Response = await client.post(
         "/api/v1/users/superuser/",
         json={
             "username": "test_user",
@@ -132,6 +147,6 @@ async def test_register_superuser_003_anomalous_invalid_registration_token(
     assert response.json() == {"detail": "Invalid registration token"}
 
     # Check that the user was not created
-    user_response = await test_db.execute(select(User))
-    users = user_response.scalars().all()
+    user_response: Result[Tuple[User]] = await test_db.execute(select(User))
+    users: Sequence[User] = user_response.scalars().all()
     assert len(users) == 0
