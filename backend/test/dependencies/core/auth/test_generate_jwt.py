@@ -12,7 +12,6 @@ the GPLv3 License. See the LICENSE file for more details.
 
 import pytest
 import jwt
-from datetime import datetime
 
 from backend.app.dependencies.core.jwt.get_secret_key import get_secret_key
 from backend.app.dependencies.core.auth.generate_jwt import generate_jwt
@@ -21,7 +20,7 @@ from backend.app.dependencies.core.auth.generate_jwt import generate_jwt
 @pytest.mark.asyncio
 async def test_generate_jwt_000_nominal(
     test_jwt_secret_key: None, test_jwt_expiration_time: str
-):
+) -> None:
     """
     Test 000 - Nominal
     Conditions: Username provided
@@ -32,6 +31,8 @@ async def test_generate_jwt_000_nominal(
     assert token
 
     # Ensure that the payload was inserted correctly
-    payload: str = jwt.decode(token, get_secret_key(), algorithms=["HS256"])  # type: ignore
-    username: str = payload.get("sub")
+    payload: str = jwt.decode(  # type: ignore
+        token, get_secret_key(), algorithms=["HS256"]
+    )
+    username: str = payload.get("sub")  # type: ignore
     assert username == "username"

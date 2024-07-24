@@ -19,8 +19,8 @@ from backend.app.dependencies.registration_token.registration_token import (
 
 @pytest.mark.asyncio
 async def test_generate_registration_token_000_nominal_first_time_startup(
-    monkeypatch, test_storage
-):
+    monkeypatch: pytest.MonkeyPatch, test_storage: str
+) -> None:
     """
     Test 000 - Nominal
     Conditions: First time start-up
@@ -28,18 +28,18 @@ async def test_generate_registration_token_000_nominal_first_time_startup(
     """
 
     # Mock the secrets.token_hex function
-    def mock_token_hex(*args, **kwargs):
+    def mock_token_hex(*args, **kwargs) -> str:  # type: ignore
         return "test_token"
 
     # Mock the secrets.token_hex function
-    monkeypatch.setattr("secrets.token_hex", mock_token_hex)
+    monkeypatch.setattr("secrets.token_hex", mock_token_hex)  # type: ignore
 
     # Set the environment variable for the registration token file
-    registration_token_file = os.path.join(test_storage, "registration_token")
+    registration_token_file: str = os.path.join(test_storage, "registration_token")
     monkeypatch.setenv("REGISTRATION_TOKEN_FILE", registration_token_file)
 
     # Run the function
-    token = generate_registration_token()
+    token: str = generate_registration_token()
 
     # Check the results
     assert token == "test_token"
@@ -49,8 +49,8 @@ async def test_generate_registration_token_000_nominal_first_time_startup(
 
 @pytest.mark.asyncio
 async def test_generate_registration_token_001_nominal_existing_token_file(
-    monkeypatch, test_storage
-):
+    monkeypatch: pytest.MonkeyPatch, test_storage: str
+) -> None:
     """
     Test 001 - Nominal
     Conditions: Token file exists
@@ -58,14 +58,14 @@ async def test_generate_registration_token_001_nominal_existing_token_file(
     """
 
     # Mock the secrets.token_hex function
-    def mock_token_hex(*args, **kwargs):
+    def mock_token_hex(*args, **kwargs) -> str:  # type: ignore
         return "test_token"
 
     # Mock the secrets.token_hex function
-    monkeypatch.setattr("secrets.token_hex", mock_token_hex)
+    monkeypatch.setattr("secrets.token_hex", mock_token_hex)  # type: ignore
 
     # Generate a token file
-    registration_token_file = os.path.join(test_storage, "registration_token")
+    registration_token_file: str = os.path.join(test_storage, "registration_token")
     with open(registration_token_file, "w") as f:
         f.write("old_token")
 
@@ -77,7 +77,7 @@ async def test_generate_registration_token_001_nominal_existing_token_file(
     monkeypatch.setenv("REGISTRATION_TOKEN_FILE", registration_token_file)
 
     # Run the function
-    token = generate_registration_token()
+    token: str = generate_registration_token()
 
     # Check the results
     assert token == "test_token"
@@ -87,8 +87,8 @@ async def test_generate_registration_token_001_nominal_existing_token_file(
 
 @pytest.mark.asyncio
 async def test_generate_registration_token_002_anomalous_path_is_a_dir(
-    monkeypatch, test_storage
-):
+    monkeypatch: pytest.MonkeyPatch, test_storage: str
+) -> None:
     """
     Test 002 - Anomalous
     Conditions: Path is a directory
@@ -96,11 +96,11 @@ async def test_generate_registration_token_002_anomalous_path_is_a_dir(
     """
 
     # Mock the secrets.token_hex function
-    def mock_token_hex(*args, **kwargs):
+    def mock_token_hex(*args, **kwargs) -> str:  # type: ignore
         return "test_token"
 
     # Mock the secrets.token_hex function
-    monkeypatch.setattr("secrets.token_hex", mock_token_hex)
+    monkeypatch.setattr("secrets.token_hex", mock_token_hex)  # type: ignore
 
     # Set the environment variable for the registration token file
     monkeypatch.setenv("REGISTRATION_TOKEN_FILE", test_storage)
@@ -112,8 +112,8 @@ async def test_generate_registration_token_002_anomalous_path_is_a_dir(
 
 @pytest.mark.asyncio
 async def test_generate_registration_token_003_anomalous_nonexistent_path(
-    monkeypatch, test_storage
-):
+    monkeypatch: pytest.MonkeyPatch, test_storage: str
+) -> None:
     """
     Test 003 - Anomalous
     Conditions: Path does not exist
@@ -121,27 +121,27 @@ async def test_generate_registration_token_003_anomalous_nonexistent_path(
     """
 
     # Mock the secrets.token_hex function
-    def mock_token_hex(*args, **kwargs):
+    def mock_token_hex(*args, **kwargs) -> str:  # type: ignore
         return "test_token"
 
     # Mock the secrets.token_hex function
-    monkeypatch.setattr("secrets.token_hex", mock_token_hex)
+    monkeypatch.setattr("secrets.token_hex", mock_token_hex)  # type: ignore
 
     # Set the environment variable for the registration token file
-    registration_token_file = os.path.join(
+    registration_token_file: str = os.path.join(
         test_storage, "nonexistent", "registration_token"
     )
     monkeypatch.setenv("REGISTRATION_TOKEN_FILE", registration_token_file)
 
     # Run the function
-    with pytest.raises(FileNotFoundError) as e:
+    with pytest.raises(FileNotFoundError):
         generate_registration_token()
 
 
 @pytest.mark.asyncio
 async def test_generate_registration_token_004_anomalous_path_is_readonly(
-    monkeypatch, test_storage
-):
+    monkeypatch: pytest.MonkeyPatch, test_storage: str
+) -> None:
     """
     Test 004 - Anomalous
     Conditions: Path is read-only
@@ -149,14 +149,14 @@ async def test_generate_registration_token_004_anomalous_path_is_readonly(
     """
 
     # Mock the secrets.token_hex function
-    def mock_token_hex(*args, **kwargs):
+    def mock_token_hex(*args, **kwargs) -> str:  # type: ignore
         return "test_token"
 
     # Mock the secrets.token_hex function
-    monkeypatch.setattr("secrets.token_hex", mock_token_hex)
+    monkeypatch.setattr("secrets.token_hex", mock_token_hex)  # type: ignore
 
     # Set the environment variable for the registration token file
-    registration_token_file = os.path.join(test_storage, "registration_token")
+    registration_token_file: str = os.path.join(test_storage, "registration_token")
     with open(registration_token_file, "w") as f:
         f.write("old_token")
     os.chmod(registration_token_file, 0o444)
