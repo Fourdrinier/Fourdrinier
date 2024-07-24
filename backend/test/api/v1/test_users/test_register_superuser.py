@@ -47,7 +47,7 @@ async def test_register_superuser_000_nominal_superuser(
     user: User | None = await test_db.get(User, "test_user")
     assert user is not None
     assert str(user.username) == "test_user"
-    assert user.is_superuser.is_(True)
+    assert user.is_superuser is True
 
 
 @pytest.mark.asyncio
