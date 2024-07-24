@@ -19,7 +19,6 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.schema import Column
 
-from backend.app.dependencies.core.auth.generate_jwt import generate_jwt
 from backend.app.db.models import User
 
 
@@ -36,9 +35,6 @@ async def test_refresh_000_nominal(
     Conditions: Valid username and refresh token given
     Result: HTTP 201 - New JWT and refresh token returned
     """
-    # Generate the JWT
-    jwt: str = generate_jwt(username=str(seed_user.username))
-
     # Create a initial refresh token
     initial_refresh_token: str = secrets.token_hex(32)
     seed_user.refresh_token = initial_refresh_token  # type: ignore
