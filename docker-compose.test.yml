@@ -1,25 +1,5 @@
 services:
 
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.test
-    env_file: .env
-    environment:
-      POSTGRES_DB: "postgres"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
-      POSTGRES_HOST: "db"
-      POSTGRES_PORT: "5432"
-      CONTAINER_ENV: "true"
-    ports:
-      - "8000:8000"
-    depends_on:
-      postgres_test:
-        condition: service_healthy
-    networks:
-      - fd_test
-
   postgres_test:
     image: postgres:latest
     volumes:
@@ -35,6 +15,26 @@ services:
       interval: 5s
       timeout: 2s
       retries: 5
+    networks:
+      - fd_test
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    env_file: .env
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@postgres_test:5432/postgres"
+      ASYNC_DATABASE_URL: "postgresql+asyncpg://postgres:postgres@postgres_test:5432/postgres"
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      CONTAINER_ENV: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres_test:
+        condition: service_healthy
     networks:
       - fd_test
 
