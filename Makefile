@@ -28,10 +28,6 @@ cleanup:
 	- docker-compose $(PROD_CONFIG) down -v
 	- docker-compose $(TEST_CONFIG) down -v
 
-test: prepare_cache build_test
-	- docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions --volume $(PWD)/.pytest_cache:/fourdrinier/.pytest_cache backend python -m pytest
-	docker-compose $(TEST_CONFIG) down -v
-
 revision:
 	- docker-compose $(TEST_CONFIG) down -v
 	docker-compose $(TEST_CONFIG) build backend
@@ -39,6 +35,12 @@ revision:
 	docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions --entrypoint /fourdrinier/backend/scripts/generate_revision.sh backend $(ALEMBIC_TAG)
 	- docker-compose $(TEST_CONFIG) down -v
 
-migrate:
+migrate_test:
 	docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions backend python -m alembic upgrade head
 	docker-compose $(TEST_CONFIG) down
+
+test: prepare_cache build_test migrate_test
+	- docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions --volume $(PWD)/.pytest_cache:/fourdrinier/.pytest_cache backend python -m pytest
+	docker-compose $(TEST_CONFIG) down -v
+
+
