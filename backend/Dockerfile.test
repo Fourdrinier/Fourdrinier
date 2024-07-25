@@ -39,8 +39,8 @@ RUN chmod 777 /fourdrinier/backend/scripts/generate_revision.sh
 RUN mkdir -p /var/lib/fourdrinier && \
     chown -R nonroot /var/lib/fourdrinier
 
-# # Switch to the non-root user
-# USER nonroot
+# Switch to the non-root user
+USER nonroot
 
 # Create the registration token file
 RUN touch /var/lib/fourdrinier/registration_token
