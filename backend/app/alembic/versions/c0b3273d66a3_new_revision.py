@@ -1,8 +1,8 @@
 """new_revision
 
-Revision ID: af57d02158a3
+Revision ID: c0b3273d66a3
 Revises: 
-Create Date: 2024-07-25 17:51:46.015363
+Create Date: 2024-07-25 18:19:09.378572
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'af57d02158a3'
+revision: str = 'c0b3273d66a3'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,18 +25,18 @@ def upgrade() -> None:
     sa.Column('email', sa.String(), nullable=True),
     sa.Column('hashed_password', sa.String(), nullable=False),
     sa.Column('refresh_token', sa.String(), nullable=True),
-    sa.Column('is_active', sa.Boolean(), nullable=True),
-    sa.Column('is_superuser', sa.Boolean(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('is_superuser', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('username')
     )
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
-    op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=True)
+    op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=False)
     op.create_table('playset',
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
-    sa.Column('description', sa.String(), nullable=True),
-    sa.Column('owner_username', sa.String(), nullable=True),
-    sa.Column('is_private', sa.Boolean(), nullable=True),
+    sa.Column('description', sa.String(), nullable=False),
+    sa.Column('owner_username', sa.String(), nullable=False),
+    sa.Column('is_private', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['owner_username'], ['user.username'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -48,8 +48,8 @@ def upgrade() -> None:
     sa.Column('loader', sa.String(), nullable=False),
     sa.Column('game_version', sa.String(), nullable=False),
     sa.Column('builder', sa.String(), nullable=False),
-    sa.Column('owner_username', sa.String(), nullable=True),
-    sa.Column('is_private', sa.Boolean(), nullable=True),
+    sa.Column('owner_username', sa.String(), nullable=False),
+    sa.Column('is_private', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['owner_username'], ['user.username'], ),
     sa.PrimaryKeyConstraint('id')
     )

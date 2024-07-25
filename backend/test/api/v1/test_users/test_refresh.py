@@ -17,7 +17,6 @@ import secrets
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql.schema import Column
 
 from backend.app.db.models import User
 
@@ -42,7 +41,7 @@ async def test_refresh_000_nominal(
     await test_db.refresh(seed_user)
 
     # Refresh the JWT
-    query_params: dict[str, Column[str]] = {
+    query_params: dict[str, str] = {
         "refresh_token": seed_user.refresh_token,
         "client_id": seed_user.username,
     }
@@ -81,7 +80,7 @@ async def test_refresh_001_anomalous_no_token(
     await test_db.refresh(seed_user)
 
     # Make the request
-    query_params: dict[str, Column[str]] = {"client_id": seed_user.username}
+    query_params: dict[str, str] = {"client_id": str(seed_user.username)}
     response: Response = await client.post(
         "/api/v1/users/refresh", params=query_params  # type: ignore
     )
@@ -127,7 +126,7 @@ async def test_refresh_002_anomalous_no_username(
     await test_db.refresh(seed_user)
 
     # Make the request
-    query_params: dict[str, Column[str]] = {"refresh_token": seed_user.refresh_token}
+    query_params: dict[str, str] = {"refresh_token": seed_user.refresh_token}
     response: Response = await client.post(
         "/api/v1/users/refresh", params=query_params  # type: ignore
     )
@@ -173,7 +172,7 @@ async def test_refresh_003_anomalous_invalid_username(
     await test_db.refresh(seed_user)
 
     # Make the request
-    query_params: dict[str, str | Column[str]] = {
+    query_params: dict[str, str] = {
         "client_id": "invalid-user",
         "refresh_token": seed_user.refresh_token,
     }
@@ -214,7 +213,7 @@ async def test_refresh_004_anomalous_invalid_token(
     await test_db.refresh(seed_user)
 
     # Make the request
-    query_params: dict[str, Column[str] | str] = {
+    query_params: dict[str, str] = {
         "client_id": seed_user.username,
         "refresh_token": "invalid-token",
     }

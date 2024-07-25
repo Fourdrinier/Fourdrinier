@@ -10,8 +10,10 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
-from sqlalchemy import Table, Boolean, Column, String, ForeignKey
-from sqlalchemy.orm import relationship
+from typing import Optional
+
+from sqlalchemy import Table, Column, String, ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from backend.app.db.session import Base
 
@@ -26,45 +28,40 @@ playset_server_association = Table(
 
 
 class User(Base):
-    __tablename__ = "user"
-    username = Column(String, primary_key=True, index=True, unique=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String, nullable=False)
-    refresh_token = Column(String, default=None)
-    is_active = Column(Boolean, default=True)
-    is_superuser = Column(Boolean, default=False)
+    __tablename__: str = "user"
+    username: Mapped[str] = mapped_column(primary_key=True, index=True)
+    email: Mapped[Optional[str]] = mapped_column(unique=True, index=True)
+    hashed_password: Mapped[str]
+    refresh_token: Mapped[Optional[str]] = mapped_column(default=None)
+    is_active: Mapped[bool] = mapped_column(default=True)
+    is_superuser: Mapped[bool] = mapped_column(default=False)
     servers = relationship("Server", back_populates="owner")
     playsets = relationship("Playset", back_populates="owner")
 
 
 class Server(Base):
-    __tablename__ = "server"
-    id = Column(String, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False, default="My Server")
-    loader = Column(String, nullable=False)
-    game_version = Column(String, nullable=False)
-    builder = Column(String, nullable=False, default="docker")
-    owner_username = Column(String, ForeignKey("user.username"))
+    __tablename__: str = "server"
+    id: Mapped[str] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(index=True, default="My Server")
+    loader: Mapped[str]
+    game_version: Mapped[str]
+    builder: Mapped[str] = mapped_column(default="docker")
+    owner_username: Mapped[str] = mapped_column(ForeignKey("user.username"))
     owner = relationship("User", back_populates="servers")
-    is_private = Column(Boolean, default=False)
+    is_private: Mapped[bool] = mapped_column(default=False)
     playsets = relationship(
         "Playset", secondary=playset_server_association, back_populates="servers"
     )
 
 
 class Playset(Base):
-    __tablename__ = "playset"
-    id = Column(String, primary_key=True, index=True)
-    name = Column(
-        String,
-        index=True,
-        nullable=False,
-        default="My Playset",
-    )
-    description = Column(String, default="")
+    __tablename__: str = "playset"
+    id: Mapped[str] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(index=True, default="My Playset")
+    description: Mapped[str] = mapped_column(default="")
     servers = relationship(
         "Server", secondary=playset_server_association, back_populates="playsets"
     )
-    owner_username = Column(String, ForeignKey("user.username"))
+    owner_username: Mapped[str] = mapped_column(ForeignKey("user.username"))
     owner = relationship("User", back_populates="playsets")
-    is_private = Column(Boolean, default=False)
+    is_private: Mapped[bool] = mapped_column(default=False)
