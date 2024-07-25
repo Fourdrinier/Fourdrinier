@@ -16,7 +16,7 @@ from httpx import AsyncClient, Response
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from backend.app.db.models import Server
+from backend.app.db.models import Server, User
 
 
 @pytest.mark.asyncio
@@ -33,7 +33,7 @@ async def test_list_servers_000_nominal_no_servers(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_list_servers_001_nominal_one_server(
-    client: AsyncClient, test_db: AsyncSession
+    client: AsyncClient, test_db: AsyncSession, seed_user: User
 ) -> None:
     """
     Test 001 - Nominal
@@ -42,7 +42,11 @@ async def test_list_servers_001_nominal_one_server(
     """
     # Add a server to the database
     server = Server(
-        id="abcdefgh", name="Test Server", loader="paper", game_version="1.17.1"
+        id="abcdefgh",
+        name="Test Server",
+        loader="paper",
+        game_version="1.17.1",
+        owner=seed_user,
     )
     test_db.add(server)
     await test_db.commit()
