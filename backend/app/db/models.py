@@ -39,24 +39,6 @@ class User(Base):
     playsets = relationship("Playset", back_populates="owner")
 
 
-class Server(Base):
-    __tablename__: str = "server"
-    id: Mapped[str] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(index=True, default="My Server")
-    loader: Mapped[str]
-    game_version: Mapped[str]
-    builder: Mapped[str] = mapped_column(default="docker")
-    owner_username: Mapped[str] = mapped_column(ForeignKey("user.username"))
-    owner = relationship("User", back_populates="servers")
-    is_private: Mapped[bool] = mapped_column(default=False)
-    playsets = relationship(
-        "Playset", secondary=playset_server_association, back_populates="servers"
-    )
-    settings = relationship(
-        "Settings", back_populates="server", uselist=False, cascade="all, delete-orphan"
-    )
-
-
 class Playset(Base):
     __tablename__: str = "playset"
     id: Mapped[str] = mapped_column(primary_key=True, index=True)
@@ -70,11 +52,19 @@ class Playset(Base):
     is_private: Mapped[bool] = mapped_column(default=False)
 
 
-class Settings(Base):
-    __tablename__: str = "settings"
+class Server(Base):
+    __tablename__: str = "server"
     id: Mapped[str] = mapped_column(primary_key=True, index=True)
-    server_id: Mapped[str] = mapped_column(ForeignKey("server.id"), unique=True)
-    server = relationship("Server", back_populates="settings")
+    name: Mapped[str] = mapped_column(index=True, default="My Server")
+    loader: Mapped[str]
+    game_version: Mapped[str]
+    builder: Mapped[str] = mapped_column(default="docker")
+    owner_username: Mapped[str] = mapped_column(ForeignKey("user.username"))
+    owner = relationship("User", back_populates="servers")
+    is_private: Mapped[bool] = mapped_column(default=False)
+    playsets = relationship(
+        "Playset", secondary=playset_server_association, back_populates="servers"
+    )
 
     # Server settings
     allocated_memory: Mapped[int] = mapped_column(default=2048)

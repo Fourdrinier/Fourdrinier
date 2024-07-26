@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from httpx import AsyncClient
 from httpx import ASGITransport
 
-from backend.app.db.models import Base, User
+from backend.app.db.models import Base, User, Server
 from backend.app.db.session import get_db
 from backend.app.app import app
 
@@ -198,3 +198,22 @@ async def test_jwt_superuser(
     await test_db.refresh(seed_superuser)
     jwt: str = generate_jwt(str(seed_superuser.username))
     yield jwt
+
+
+@pytest_asyncio.fixture(scope="function")  # type: ignore
+async def seed_server(
+    test_db: AsyncSession, seed_user: User
+) -> AsyncGenerator[Server, None]:
+    server: Server = Server(
+        id="abcdefgh",
+        name="Test Server",
+        loader="fabric",
+        game_version="1.20.1",
+        builder="docker",
+        owner=seed_user,
+        is_private=False,
+    )
+    test_db.add(server)
+    await test_db.commit()
+    await test_db.refresh(server)
+    yield server
