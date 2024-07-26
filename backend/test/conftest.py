@@ -32,10 +32,16 @@ from backend.app.dependencies.registration_token.registration_token import (
 from backend.app.dependencies.core.auth.generate_jwt import generate_jwt
 from backend.app.dependencies.core.auth.get_password_hash import get_password_hash
 
-TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 TEST_STORAGE = "/tmp/fourdrinier"
 
 test_secret_key: str = secrets.token_hex(32)
+
+
+def get_test_db_url() -> str:
+    db_url: str | None = os.getenv("ASYNC_DATABASE_URL")
+    if db_url is None:
+        raise EnvironmentError("Environment variable ASYNC_DATABASE_URL is not set")
+    return db_url
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)  # type: ignore
@@ -50,12 +56,12 @@ async def test_storage() -> AsyncGenerator[str, None]:
         shutil.rmtree(TEST_STORAGE)
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)  # type: ignore
+@pytest_asyncio.fixture()  # type: ignore
 async def test_db_engine() -> AsyncGenerator[AsyncEngine, None]:
     """
     Create a database engine for use in testing
     """
-    engine: AsyncEngine = create_async_engine(TEST_DB_URL)
+    engine: AsyncEngine = create_async_engine(get_test_db_url())
     yield engine
     await engine.dispose()
 

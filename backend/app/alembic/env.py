@@ -35,7 +35,7 @@ target_metadata: MetaData = Base.metadata
 def get_url() -> str:
     url: str | None = os.getenv("DATABASE_URL")
     if not url:
-        raise EnvironmentError("DATABASE_URL environment variable not set")
+        raise EnvironmentError("ASYNC_DATABASE_URL environment variable not set")
     return url
 
 
