@@ -52,6 +52,9 @@ class Server(Base):
     playsets = relationship(
         "Playset", secondary=playset_server_association, back_populates="servers"
     )
+    settings = relationship(
+        "Settings", back_populates="server", uselist=False, cascade="all, delete-orphan"
+    )
 
 
 class Playset(Base):
@@ -65,3 +68,16 @@ class Playset(Base):
     owner_username: Mapped[str] = mapped_column(ForeignKey("user.username"))
     owner = relationship("User", back_populates="playsets")
     is_private: Mapped[bool] = mapped_column(default=False)
+
+
+class Settings(Base):
+    __tablename__: str = "settings"
+    id: Mapped[str] = mapped_column(primary_key=True, index=True)
+    server_id: Mapped[str] = mapped_column(ForeignKey("server.id"), unique=True)
+    server = relationship("Server", back_populates="settings")
+
+    # Server settings
+    allocated_memory: Mapped[int] = mapped_column(default=2048)
+    level_seed: Mapped[str] = mapped_column(default="")
+    motd: Mapped[str] = mapped_column(default="A Fourdrinier Server")
+    view_distance: Mapped[int] = mapped_column(default=16)
