@@ -23,6 +23,7 @@ EXPOSE 8000
 
 # Copy the rest of your application's code
 COPY ./app /fourdrinier/backend/app
+COPY ./logging.py /fourdrinier/backend/logging.py
 
 # Copy in the configuration file
 COPY ./config.json /fourdrinier/backend/config.json

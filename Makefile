@@ -18,6 +18,10 @@ prepare_cache:
 	mkdir -p $(PWD)/.pytest_cache
 	chmod -R 777 $(PWD)/.pytest_cache
 
+prepare_logs:
+	mkdir -p $(PWD)/logs
+	chmod 777 $(PWD)/logs
+
 build:
 	docker-compose $(PROD_CONFIG) build backend
 
@@ -39,8 +43,8 @@ migrate_test:
 	docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions backend python -m alembic upgrade head
 	docker-compose $(TEST_CONFIG) down
 
-test: prepare_cache build_test migrate_test
-	- docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions --volume $(PWD)/.pytest_cache:/fourdrinier/.pytest_cache backend python -m pytest
+test: prepare_cache prepare_logs build_test migrate_test
+	- docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions --volume $(PWD)/.pytest_cache:/fourdrinier/.pytest_cache --volume $(PWD)/logs:/fourdrinier/logs backend python -m pytest
 	docker-compose $(TEST_CONFIG) down -v
 
 

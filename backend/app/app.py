@@ -10,6 +10,7 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
+import backend.logging
 from fastapi import FastAPI
 from backend.app.api.v1.servers import router as servers_router
 from backend.app.api.v1.users import router as users_router
