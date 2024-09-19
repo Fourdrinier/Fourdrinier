@@ -24,8 +24,12 @@ psycopg2-binary = "^2.9.9"
 black = "^24.3.0"
 pytest = "^8.1.1"
 pytest-asyncio = "^0.23.5.post1"
+pytest-cov = "^5.0.0"
+pytest-mock = "^3.14.0"
 flake8 = "^7.1.0"
 pylance = "^0.13.0"
+
+
 
 [build-system]
 requires = ["poetry-core"]

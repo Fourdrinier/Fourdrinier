@@ -18,12 +18,20 @@ async def list_builds(version: str) -> list[dict[str, str]]:
     url: str = f"https://api.papermc.io/v2/projects/paper/versions/{version}/builds"
 
     # Make a request to the PaperMC API
-    response: requests.Response = requests.get(url)
+    try:
+        response: requests.Response = requests.get(url)
+    except requests.exceptions.ConnectionError:
+        raise RuntimeError("Failed to connect to the PaperMC API")
+    except requests.exceptions.Timeout:
+        raise RuntimeError("Connection to the PaperMC API timed out")
+
     if response.status_code == 200:
         data: Any = response.json()
+    elif response.status_code == 404:
+        raise RuntimeError("Version not found")
     else:
         raise RuntimeError(
-            f"Failed to get builds. Received status code {response.status_code}"
+            f"PaperMC API failed for unknown reason. Status Code: {response.status_code}"
         )
 
     # Extract the build data
@@ -38,8 +46,8 @@ async def list_builds(version: str) -> list[dict[str, str]]:
         builds.append(
             {
                 "build_id": build_id,
-                "file": file,
-                "download_url": f"https://api.papermc.io/v2/projects/paper/versions/{version}/builds/{build_id}/downloads/{file}",
+                "filename": file,
+                "url": f"https://api.papermc.io/v2/projects/paper/versions/{version}/builds/{build_id}/downloads/{file}",
             }
         )
 
