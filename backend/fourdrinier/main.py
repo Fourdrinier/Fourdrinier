@@ -15,9 +15,11 @@ from typing import Dict
 
 from fastapi import FastAPI
 
+from backend.fourdrinier.core.config import PROJECT_NAME
+
 
 # Initialize the FastAPI application object
-app = FastAPI()
+app = FastAPI(title=PROJECT_NAME)
 
 
 # Create a health check route
