@@ -94,7 +94,6 @@ async def test_refresh_001_anomalous_no_token(
             "loc": ["query", "refresh_token"],
             "msg": "Field required",
             "input": None,
-            "url": "https://errors.pydantic.dev/2.6/v/missing",
         }
     ]
 
@@ -140,7 +139,6 @@ async def test_refresh_002_anomalous_no_username(
             "loc": ["query", "client_id"],
             "msg": "Field required",
             "input": None,
-            "url": "https://errors.pydantic.dev/2.6/v/missing",
         }
     ]
 

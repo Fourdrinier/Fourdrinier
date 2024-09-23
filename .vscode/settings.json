@@ -10,5 +10,12 @@
     ],
     "python.analysis.diagnosticSeverityOverrides": {
         "reportRedeclaration": "none"
-    }
+    },
+    "python.testing.pytestArgs": [
+        "backend"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "makefile.configureOnOpen": false
 }

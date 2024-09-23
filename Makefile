@@ -47,4 +47,8 @@ test: prepare_cache prepare_logs build_test migrate_test
 	- docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions --volume $(PWD)/.pytest_cache:/fourdrinier/.pytest_cache --volume $(PWD)/logs:/fourdrinier/logs backend python -m pytest
 	docker-compose $(TEST_CONFIG) down -v
 
+test-verbose: prepare_cache prepare_logs build_test migrate_test
+	- docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions --volume $(PWD)/.pytest_cache:/fourdrinier/.pytest_cache --volume $(PWD)/logs:/fourdrinier/logs backend python -m pytest -vvv
+	docker-compose $(TEST_CONFIG) down -v
+
 

@@ -85,7 +85,6 @@ async def test_login_001_no_username_provided(
                 "loc": ["body", "username"],
                 "msg": "Field required",
                 "input": {"password": "password"},
-                "url": "https://errors.pydantic.dev/2.6/v/missing",
             }
         ]
     }
@@ -125,7 +124,6 @@ async def test_login_002_anomalous_no_password_provided(
                 "loc": ["body", "password"],
                 "msg": "Field required",
                 "input": {"username": "test-user"},
-                "url": "https://errors.pydantic.dev/2.6/v/missing",
             }
         ]
     }
