@@ -1,0 +1,5 @@
+[run]
+omit = 
+    backend/tests/*
+    */__init__.py
+    backend/app/alembic/env.py

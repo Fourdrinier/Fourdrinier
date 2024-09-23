@@ -21,6 +21,10 @@ ENV PATH="${POETRY_VENV}/bin:${PATH}"
 # Set the working directory
 WORKDIR /fd
 
+# Copy the source code
+COPY ./fourdrinier/alembic.ini /fd/alembic.ini
+COPY ./fourdrinier /fd/backend/fourdrinier
+
 ####################################################################################################
 # Base Image Builder
 ####################################################################################################
@@ -40,14 +44,38 @@ FROM base AS prod
 # Copy the virtual environment from the builder stage
 COPY --from=builder /fd/.venv ${POETRY_VENV}
 
-# Copy the source code
-COPY ./fourdrinier/alembic.ini /fd/alembic.ini
-COPY ./fourdrinier /fd/backend/fourdrinier
-
-# Copy in the scripts
-COPY ./scripts /fd/backend/scripts
-
 EXPOSE 8000
 
 # Run the FastAPI server
 CMD python3 -m uvicorn backend.fourdrinier.main:app --host 0.0.0.0 --port 8000
+
+####################################################################################################
+# Test Image Builder
+####################################################################################################
+FROM base AS build_test
+
+# Copy the virtual environment from the builder stage
+COPY --from=builder /fd/.venv /fd/.venv
+
+# Install test dependencies
+COPY pyproject.toml poetry.lock /fd/
+RUN poetry install --only dev --no-root
+
+####################################################################################################
+# Test Image
+####################################################################################################
+FROM base AS test
+
+# COPY the virtual environment from the build_test stage
+COPY --from=build_test /fd/.venv /fd/.venv
+
+# Copy the source code
+COPY --from=build_test /fd/.venv ${POETRY_VENV}
+
+# Copy in the scripts
+COPY ./scripts /fd/backend/scripts
+
+# Copy in the tests
+COPY ./test /fd/backend/tests
+COPY ./test/pytest.ini /fd/
+COPY ./test/.coveragerc /fd/

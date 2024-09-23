@@ -1,5 +1,43 @@
 services:
 
+  postgres_test:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGUSER: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - test-data:/var/lib/postgresql/data:cached
+    profiles: [ testing ]
+
+  backend_test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: test
+    image: fourdrinier-backend
+    environment:
+      POSTGRES_HOST: postgres_test
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres_test:
+        condition: service_healthy
+    profiles: [ testing ]
+
   postgres:
     image: postgres:15
     restart: always
@@ -40,3 +78,4 @@ services:
 
 volumes:
   db-data:
+  test-data:
