@@ -10,7 +10,6 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
-import uuid
 from typing import Sequence
 from typing import Tuple
 
@@ -19,6 +18,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.fourdrinier.core.utils import generate_id
 from backend.fourdrinier.db.models import Server
 from backend.fourdrinier.db.schema import ServerCreate
 
@@ -28,7 +28,7 @@ async def create_server(db: AsyncSession, server: ServerCreate) -> Server:
     Create a new server object in the database.
     """
     new_server = Server(**server.model_dump())
-    new_server.id = str(uuid.uuid4())
+    new_server.id = await generate_id()
     try:
         db.add(new_server)
         await db.commit()

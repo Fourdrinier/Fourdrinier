@@ -2,4 +2,6 @@
 omit = 
     backend/tests/*
     */__init__.py
-    backend/app/alembic/env.py
+    backend/fourdrinier/alembic/env.py
+    backend/fourdrinier/db/session.py
+    

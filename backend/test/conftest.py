@@ -21,6 +21,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
 from backend.fourdrinier.core.config import ASYNC_DATABASE_URL
+from backend.fourdrinier.db.models import Base
 from backend.fourdrinier.db.session import get_db
 from backend.fourdrinier.main import app
 
@@ -34,9 +35,15 @@ async def test_db_engine() -> AsyncGenerator[AsyncEngine, None]:
 
 @pytest.fixture(scope="function")
 async def test_db(test_db_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
+    async with test_db_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
     AsyncSessionMaker = async_sessionmaker(bind=test_db_engine)
     async with AsyncSessionMaker() as session:
         yield session
+
+    async with test_db_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest.fixture(scope="function")
