@@ -1,9 +1,0 @@
-# Secrets
-.env
-
-# Python cacheing files
-__pycache__
-.pytest_cache
-
-# Logs
-logs/
