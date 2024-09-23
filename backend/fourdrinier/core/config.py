@@ -22,6 +22,6 @@ POSTGRES_URL_BASE: str = (
     f"/{os.getenv('POSTGRES_DB', 'fourdrinier')}"
 )
 
-# Database URLs
+# Database URLs (with driver prefixes) for use by SQLAlchemy and Alembic
 DATABASE_URL: str = f"postgresql://{POSTGRES_URL_BASE}"
 ASYNC_DATABASE_URL: str = f"postgresql+asyncpg://{POSTGRES_URL_BASE}"
