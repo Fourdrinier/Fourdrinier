@@ -26,6 +26,9 @@ cleanup:
 	@echo "Cleaning up..."
 	@docker compose $(PRODUCTION_CONFIG) down --volumes
 
+# Generate an Alembic revision file
 revision: build-backend
 	@echo "Creating a new revision..."
+	- docker compose $(PRODUCTION_CONFIG) down --volumes
 	@docker compose $(PRODUCTION_CONFIG) run --rm --volume $(PWD)/backend/fourdrinier/alembic/versions:/fd/backend/fourdrinier/alembic/versions --entrypoint /fd/backend/scripts/generate_revision.sh backend $(ALEMBIC_TAG)
+	- docker compose $(PRODUCTION_CONFIG) down --volumes
