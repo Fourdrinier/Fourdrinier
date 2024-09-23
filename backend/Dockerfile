@@ -41,9 +41,13 @@ FROM base AS prod
 COPY --from=builder /fd/.venv ${POETRY_VENV}
 
 # Copy the source code
-COPY ./fourdrinier /fd/backend/app
+COPY ./fourdrinier/alembic.ini /fd/alembic.ini
+COPY ./fourdrinier /fd/backend/fourdrinier
+
+# Copy in the scripts
+COPY ./scripts /fd/backend/scripts
 
 EXPOSE 8000
 
 # Run the FastAPI server
-CMD python3 -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
+CMD python3 -m uvicorn backend.fourdrinier.main:app --host 0.0.0.0 --port 8000
