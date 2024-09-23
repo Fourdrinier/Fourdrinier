@@ -1,21 +1,32 @@
 {
+    "flake8.args": [
+        "--config=${workspaceFolder}/.flake8"
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "always"
+        }
+    },
+    "isort.args": [
+        "--profile",
+        "black",
+        "--settings-file",
+        "${workspaceFolder}/backend/pyproject.toml"
+    ],
     "editor.formatOnSave": true,
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
     "python.languageServer": "Pylance",
     "python.analysis.typeCheckingMode": "strict",
     "python.analysis.inlayHints.functionReturnTypes": true,
     "python.analysis.inlayHints.pytestParameters": true,
     "python.analysis.inlayHints.variableTypes": true,
-    "python.analysis.extraPaths": [
-        "${workspaceFolder}/backend/app/db/models",
-    ],
     "python.analysis.diagnosticSeverityOverrides": {
-        "reportRedeclaration": "none"
+        "reportRedeclaration": "none",
     },
-    "python.testing.pytestArgs": [
-        "backend"
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/backend/app/db/models"
     ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "python.testing.autoTestDiscoverOnSaveEnabled": true,
-    "makefile.configureOnOpen": false
 }
