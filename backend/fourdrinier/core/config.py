@@ -19,10 +19,9 @@ PROJECT_NAME = "fourdrinier"
 POSTGRES_URL_BASE: str = (
     f"{os.getenv('POSTGRES_USER', 'postgres')}:{os.getenv('POSTGRES_PASSWORD', 'postgres')}"
     f"@{os.getenv('POSTGRES_HOST', 'postgres')}:{os.getenv('POSTGRES_PORT', '5432')}"
+    f"/{os.getenv('POSTGRES_DB', 'fourdrinier')}"
 )
 
 # Database URLs
-DATABASE_URL: str = f"postgresql://{POSTGRES_URL_BASE}/{os.getenv('POSTGRES_DB', 'fourdrinier')}"
-ASYNC_DATABASE_URL: str = (
-    f"postgresql+asyncpg://{POSTGRES_URL_BASE}/{os.getenv('POSTGRES_DB', 'fourdrinier')}"
-)
+DATABASE_URL: str = f"postgresql://{POSTGRES_URL_BASE}"
+ASYNC_DATABASE_URL: str = f"postgresql+asyncpg://{POSTGRES_URL_BASE}"
