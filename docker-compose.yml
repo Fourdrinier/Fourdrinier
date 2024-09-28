@@ -74,8 +74,15 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - local-network
     profiles: [ default ]
 
 volumes:
   db-data:
   test-data:
+
+
+networks:
+  local-network:
+    driver: bridge
