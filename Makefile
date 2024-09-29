@@ -34,14 +34,14 @@ prepare-cache:
 test: prepare-cache build-backend-test
 	@echo "Running the application for testing..."
 	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/backend/fourdrinier/alembic/versions:/fd/backend/fourdrinier/alembic/versions backend_test python -m alembic upgrade head
-	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/.pytest_cache:/fd/.pytest_cache backend_test python -m pytest --cov=backend --cov-branch --cov-report term
+	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/.pytest_cache:/fd/.pytest_cache --volume $(PWD)/tmp:/fd/tmp backend_test python -m pytest --cov=backend --cov-branch --cov-report term
 	@docker compose $(TESTING_CONFIG) down --volumes
 
 # Run the application tests in verbose mode for debugging
 test-verbose: prepare-cache build-backend-test
 	@echo "Running the application for testing..."
 	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/backend/fourdrinier/alembic/versions:/fd/backend/fourdrinier/alembic/versions backend_test python -m alembic upgrade head
-	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/.pytest_cache:/fd/.pytest_cache backend_test python -m pytest -vvv --cov=backend --cov-branch --cov-report term
+	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/.pytest_cache:/fd/.pytest_cache --volume $(PWD)/tmp:/fd/tmp backend_test python -m pytest -vvv --cov=backend --cov-branch --cov-report term
 	@docker compose $(TESTING_CONFIG) down --volumes
 
 # Remove containers and volumes

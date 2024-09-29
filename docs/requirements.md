@@ -6,4 +6,3 @@
 ## Deployment
 - The system SHALL enable a user to deploy a server to a given Docker daemon
 - The system SHALL enable a user to deploy a server to an AWS instance
-
