@@ -1,54 +1,58 @@
 # Makefile
 
 # Use shell command interpreter
-SHELL := /bin/bash 
+SHELL := /bin/bash
 
-# Docker Compose configurations
-PROD_CONFIG = -f docker-compose.yml
-TEST_CONFIG = -f docker-compose.test.yml
+# Docker configurations
+PRODUCTION_CONFIG = --profile default
+TESTING_CONFIG = --profile testing
 
-# Default tag for alembic revision
-ALEMBIC_TAG = "new_revision"
+ALEMBIC_TAG ?= "initial revision"
 
 # Define targets
-.PHONY: prepare_cache build build_test test
+.PHONY: build-backend build-backend-test run prepare-cache test cleanup revision
 
-# Perform unit tests with isolated database
-prepare_cache:
-	mkdir -p $(PWD)/.pytest_cache
-	chmod -R 777 $(PWD)/.pytest_cache
+# Build the backend
+build-backend:
+	@echo "Building the backend..."
+	@docker compose $(PRODUCTION_CONFIG) build backend
 
-prepare_logs:
-	mkdir -p $(PWD)/logs
-	chmod 777 $(PWD)/logs
+build-backend-test:
+	@echo "Building the backend for testing..."
+	@docker compose $(TESTING_CONFIG) build backend_test
 
-build:
-	docker-compose $(PROD_CONFIG) build backend
+# Run the application
+run: build-backend
+	@echo "Running the application..."
+	@docker compose $(PRODUCTION_CONFIG) up
 
-build_test:
-	docker-compose $(TEST_CONFIG) build backend
+prepare-cache:
+	@echo "Preparing PyTest cache..."
+	@chmod -R 777 $(PWD)/.pytest_cache
 
+# Run the application tests
+test: prepare-cache build-backend-test
+	@echo "Running the application for testing..."
+	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/backend/fourdrinier/alembic/versions:/fd/backend/fourdrinier/alembic/versions backend_test python -m alembic upgrade head
+	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/.pytest_cache:/fd/.pytest_cache --volume $(PWD)/tmp:/fd/tmp backend_test python -m pytest --cov=backend --cov-branch --cov-report term
+	@docker compose $(TESTING_CONFIG) down --volumes
+
+# Run the application tests in verbose mode for debugging
+test-verbose: prepare-cache build-backend-test
+	@echo "Running the application for testing..."
+	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/backend/fourdrinier/alembic/versions:/fd/backend/fourdrinier/alembic/versions backend_test python -m alembic upgrade head
+	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/.pytest_cache:/fd/.pytest_cache --volume $(PWD)/tmp:/fd/tmp backend_test python -m pytest -vvv --cov=backend --cov-branch --cov-report term
+	@docker compose $(TESTING_CONFIG) down --volumes
+
+# Remove containers and volumes
 cleanup:
-	- docker-compose $(PROD_CONFIG) down -v
-	- docker-compose $(TEST_CONFIG) down -v
+	@echo "Cleaning up..."
+	@docker compose $(PRODUCTION_CONFIG) down --volumes
+	@docker compose $(TESTING_CONFIG) down --volumes
 
-revision:
-	- docker-compose $(TEST_CONFIG) down -v
-	docker-compose $(TEST_CONFIG) build backend
-	docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions backend ls
-	docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions --entrypoint /fourdrinier/backend/scripts/generate_revision.sh backend $(ALEMBIC_TAG)
-	- docker-compose $(TEST_CONFIG) down -v
-
-migrate_test:
-	docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions backend python -m alembic upgrade head
-	docker-compose $(TEST_CONFIG) down
-
-test: prepare_cache prepare_logs build_test migrate_test
-	- docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions --volume $(PWD)/.pytest_cache:/fourdrinier/.pytest_cache --volume $(PWD)/logs:/fourdrinier/logs backend python -m pytest
-	docker-compose $(TEST_CONFIG) down -v
-
-test-verbose: prepare_cache prepare_logs build_test migrate_test
-	- docker-compose $(TEST_CONFIG) run --rm --volume $(PWD)/backend/app/alembic/versions:/fourdrinier/backend/app/alembic/versions --volume $(PWD)/.pytest_cache:/fourdrinier/.pytest_cache --volume $(PWD)/logs:/fourdrinier/logs backend python -m pytest -vvv
-	docker-compose $(TEST_CONFIG) down -v
-
-
+# Generate an Alembic revision file
+revision: build-backend
+	@echo "Creating a new revision..."
+	- docker compose $(TESTING_CONFIG) down --volumes
+	@docker compose $(TESTING_CONFIG) run --rm --volume $(PWD)/backend/fourdrinier/alembic/versions:/fd/backend/fourdrinier/alembic/versions --entrypoint /fd/backend/scripts/generate_revision.sh backend $(ALEMBIC_TAG)
+	- docker compose $(TESTING_CONFIG) down --volumes

@@ -1,42 +1,81 @@
-# Use the official Python base image
-FROM python:3.11-slim
+####################################################################################################
+# Base Image
+####################################################################################################
+FROM ubuntu:22.04 AS base
 
-# Create a non-root user and group
-RUN adduser --system --no-create-home nonroot
+# Update base image packages
+RUN apt-get update && apt-get install -y ca-certificates && \
+    apt-get update && apt-get upgrade -y
 
-# Set the working directory in the container
-WORKDIR /fourdrinier
+# Install Python & Curl
+RUN apt-get install -y python3 python3-pip curl openssh-client
 
 # Install Poetry for dependency management
-RUN pip install poetry
+RUN python3 -m pip install poetry
 
-# Install dependencies using Poetry
-COPY pyproject.toml poetry.lock* /fourdrinier/backend/
-RUN poetry config virtualenvs.create false \
+# Define Poetry's environment variables
+ENV POETRY_HOME="/opt/poetry"
+ENV POETRY_VENV=/opt/poetry-venv
+ENV PATH="${POETRY_VENV}/bin:${PATH}"
+
+# Set the working directory
+WORKDIR /fd
+
+# Copy the source code
+COPY ./fourdrinier/alembic.ini /fd/alembic.ini
+COPY ./fourdrinier /fd/backend/fourdrinier
+
+####################################################################################################
+# Base Image Builder
+####################################################################################################
+FROM base AS builder
+
+# Install root dependencies
+COPY pyproject.toml poetry.lock /fd/
+RUN poetry config virtualenvs.create true \
+    && poetry config virtualenvs.in-project true \
     && poetry install --no-dev
 
-# Copy the alembic.ini file to the container
-COPY alembic.ini /fourdrinier/backend/alembic.ini
+####################################################################################################
+# Production Image
+####################################################################################################
+FROM base AS prod
 
-# Make port 8000 available to the world outside this container
+# Copy the virtual environment from the builder stage
+COPY --from=builder /fd/.venv ${POETRY_VENV}
+
 EXPOSE 8000
 
-# Copy the rest of your application's code
-COPY ./app /fourdrinier/backend/app
-COPY ./logging.py /fourdrinier/backend/logging.py
+# Run the FastAPI server
+CMD python3 -m alembic upgrade head && python -m uvicorn backend.fourdrinier.main:app --host 0.0.0.0 --port 8000
 
-# Copy in the configuration file
-COPY ./config.json /fourdrinier/backend/config.json
+####################################################################################################
+# Test Image Builder
+####################################################################################################
+FROM base AS build_test
 
-# Create the directory and change ownership
-RUN mkdir -p /var/lib/fourdrinier && \
-    chown -R nonroot /var/lib/fourdrinier
+# Copy the virtual environment from the builder stage
+COPY --from=builder /fd/.venv /fd/.venv
 
-# Switch to the non-root user
-USER nonroot
+# Install test dependencies
+COPY pyproject.toml poetry.lock /fd/
+RUN poetry install --only dev --no-root
 
-# Create the registration token file
-RUN touch /var/lib/fourdrinier/registration_token
+####################################################################################################
+# Test Image
+####################################################################################################
+FROM base AS test
 
-# Start the FastAPI app
-CMD python -m alembic upgrade head && python -m uvicorn backend.app.app:app --host 0.0.0.0 --port 8000
+# COPY the virtual environment from the build_test stage
+COPY --from=build_test /fd/.venv /fd/.venv
+
+# Copy the source code
+COPY --from=build_test /fd/.venv ${POETRY_VENV}
+
+# Copy in the scripts
+COPY ./scripts /fd/backend/scripts
+
+# Copy in the tests
+COPY ./test /fd/backend/tests
+COPY ./test/pytest.ini /fd/
+COPY ./test/.coveragerc /fd/
