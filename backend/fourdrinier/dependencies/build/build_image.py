@@ -17,8 +17,6 @@ import tarfile
 import textwrap
 import docker.errors
 from docker.models.images import Image
-import docker
-from typing import Dict, Iterator
 
 
 async def build_dockerfile(

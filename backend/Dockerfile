@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y ca-certificates && \
     apt-get update && apt-get upgrade -y
 
 # Install Python & Curl
-RUN apt-get install -y python3 python3-pip curl
+RUN apt-get install -y python3 python3-pip curl openssh-client
 
 # Install Poetry for dependency management
 RUN python3 -m pip install poetry
@@ -17,10 +17,6 @@ RUN python3 -m pip install poetry
 ENV POETRY_HOME="/opt/poetry"
 ENV POETRY_VENV=/opt/poetry-venv
 ENV PATH="${POETRY_VENV}/bin:${PATH}"
-
-# Copy the SSH key
-COPY ./ssh/id_rsa /root/.ssh/id_rsa
-RUN chmod 600 /root/.ssh/id_rsa
 
 # Set the working directory
 WORKDIR /fd

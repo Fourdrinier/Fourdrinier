@@ -10,13 +10,11 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
-import base64
-import uuid
+import secrets
 
 
 async def generate_id() -> str:
     """
     Generate a unique 8-character ID.
     """
-    uid: bytes = base64.urlsafe_b64encode(uuid.uuid4().bytes)
-    return uid.decode("utf-8")[:8]
+    return secrets.token_hex(4)

@@ -71,7 +71,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-      DOCKER_HOST: $DOCKER_HOST
+      DOCKER_HOST: $DOCKER_HOST_OVERRIDE
     ports:
       - "8000:8000"
     depends_on:
@@ -80,6 +80,8 @@ services:
     networks:
       - fourdrinier-network
       - bridge-network
+    volumes:
+      - ./ssh:/root/.ssh
     profiles: [ default ]
 
 volumes:
