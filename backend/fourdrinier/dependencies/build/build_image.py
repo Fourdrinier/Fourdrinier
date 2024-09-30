@@ -11,7 +11,14 @@ the GPLv3 License. See the LICENSE file for more details.
 """
 
 import os
+import docker
+import io
+import tarfile
 import textwrap
+import docker.errors
+from docker.models.images import Image
+import docker
+from typing import Dict, Iterator
 
 
 async def build_dockerfile(
@@ -37,3 +44,38 @@ async def build_dockerfile(
     CMD java -Xms{min_memory}M -Xmx{max_memory}M -jar server.jar
     """
     return textwrap.dedent(content).strip()
+
+
+async def build_image(dockerfile_content: str, image_name: str) -> str:
+    """
+    Build a Docker image from a Dockerfile
+    """
+    client = docker.DockerClient(base_url=os.getenv("DOCKER_HOST"))
+
+    # Create an in-memory bytes buffer to store the tar archive
+    tar_stream = io.BytesIO()
+
+    # Create an in-memory tar archive containing the Dockerfile
+    with tarfile.TarFile(fileobj=tar_stream, mode="w") as tar:
+        dockerfile_data = dockerfile_content.encode("utf-8")
+        dockerfile_info = tarfile.TarInfo(name="Dockerfile")
+        dockerfile_info.size = len(dockerfile_data)
+
+        # Add the Dockerfile content to the tar archive
+        tar.addfile(tarinfo=dockerfile_info, fileobj=io.BytesIO(dockerfile_data))
+
+    # Reset the stream position to the beginning
+    tar_stream.seek(0)
+
+    # Build the Docker image using the in-memory tar archive
+    image: Image
+    image, logs = client.images.build(fileobj=tar_stream, custom_context=True, tag=image_name)
+
+    # Print build logs
+    for log in logs:
+        if "stream" in log:
+            print(log["stream"].strip())
+
+    assert image.id
+    print(f"Image '{image_name}' built successfully.")
+    return image.id

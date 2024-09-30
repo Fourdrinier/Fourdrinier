@@ -13,6 +13,7 @@ the GPLv3 License. See the LICENSE file for more details.
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -21,6 +22,8 @@ from backend.fourdrinier.db.models import Server
 from backend.fourdrinier.db.schema import ServerCreate
 from backend.fourdrinier.db.schema import ServerResponse
 from backend.fourdrinier.db.session import get_db
+from backend.fourdrinier.dependencies.build.build_image import build_dockerfile
+from backend.fourdrinier.dependencies.build.build_image import build_image
 
 
 router = APIRouter()
@@ -54,3 +57,28 @@ async def get_server(server_id: str, db: AsyncSession = Depends(get_db)) -> Serv
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Server not found")
     return server
+
+
+@router.post("/{server_id}/build", status_code=201)
+async def build_server(server_id: str, db: AsyncSession = Depends(get_db)) -> JSONResponse:
+    """
+    Build a server
+    """
+    try:
+        server: Server = await crud.get_server(db, server_id)
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Server not found")
+
+    # Build the Dockerfile content
+    dockerfile: str = await build_dockerfile(
+        17,
+        f"https://api.papermc.io/v2/projects/paper/versions/1.20.1/builds/196/downloads/paper-1.20.1-196.jar",
+        25565,
+        2048,
+        2048,
+    )
+
+    # Build the Docker image
+    image_id: str = await build_image(dockerfile, f"fourdrinier-server-{server_id}")
+
+    return JSONResponse(content={"image_id": image_id})

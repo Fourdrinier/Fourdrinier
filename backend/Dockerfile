@@ -18,6 +18,10 @@ ENV POETRY_HOME="/opt/poetry"
 ENV POETRY_VENV=/opt/poetry-venv
 ENV PATH="${POETRY_VENV}/bin:${PATH}"
 
+# Copy the SSH key
+COPY ./ssh/id_rsa /root/.ssh/id_rsa
+RUN chmod 600 /root/.ssh/id_rsa
+
 # Set the working directory
 WORKDIR /fd
 
@@ -47,7 +51,7 @@ COPY --from=builder /fd/.venv ${POETRY_VENV}
 EXPOSE 8000
 
 # Run the FastAPI server
-CMD python3 -m uvicorn backend.fourdrinier.main:app --host 0.0.0.0 --port 8000
+CMD python3 -m alembic upgrade head && python -m uvicorn backend.fourdrinier.main:app --host 0.0.0.0 --port 8000
 
 ####################################################################################################
 # Test Image Builder
