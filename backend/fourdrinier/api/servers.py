@@ -79,6 +79,7 @@ async def build_server(server_id: str, db: AsyncSession = Depends(get_db)) -> JS
     )
 
     # Build the Docker image
-    image_id: str = await build_image(dockerfile, f"fourdrinier-server-{server_id}")
+    image_name = f"fourdrinier-server-{server_id}"
+    image_id: str = await build_image(dockerfile, image_name)
 
-    return JSONResponse(content={"image_id": image_id})
+    return JSONResponse(content={"image": {"id": image_id, "name": image_name}})
