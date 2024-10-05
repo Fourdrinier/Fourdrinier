@@ -75,4 +75,5 @@ async def build_image(dockerfile_content: str, image_name: str) -> str:
             print(log["stream"].strip())
 
     assert image.id
+    print(f"Image '{image_name}' built successfully.")
     return image.id
