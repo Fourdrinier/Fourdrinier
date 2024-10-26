@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y ca-certificates && \
     apt-get update && apt-get upgrade -y
 
 # Install Python & Curl
-RUN apt-get install -y python3 python3-pip curl openssh-client
+RUN apt-get update && apt-get install -y python3 python3-pip curl openssh-client
 
 # Install Poetry for dependency management
 RUN python3 -m pip install poetry

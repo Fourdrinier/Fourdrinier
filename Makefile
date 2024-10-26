@@ -28,6 +28,7 @@ run: build-backend
 
 prepare-cache:
 	@echo "Preparing PyTest cache..."
+	@mkdir -p $(PWD)/.pytest_cache
 	@chmod -R 777 $(PWD)/.pytest_cache
 
 # Run the application tests
