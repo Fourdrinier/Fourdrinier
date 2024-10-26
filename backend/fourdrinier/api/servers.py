@@ -24,6 +24,7 @@ from backend.fourdrinier.db.schema import ServerResponse
 from backend.fourdrinier.db.session import get_db
 from backend.fourdrinier.dependencies.build.build_image import build_dockerfile
 from backend.fourdrinier.dependencies.build.build_image import build_image
+from backend.fourdrinier.dependencies.deploy.start_container import start_container
 
 
 router = APIRouter()
@@ -83,3 +84,20 @@ async def build_server(server_id: str, db: AsyncSession = Depends(get_db)) -> JS
     image_id: str = await build_image(dockerfile, image_name)
 
     return JSONResponse(content={"image": {"id": image_id, "name": image_name}})
+
+
+@router.post("/{server_id}/start", status_code=201)
+async def start_server(server_id: str, db: AsyncSession = Depends(get_db)) -> JSONResponse:
+    """
+    Start a server
+    """
+    try:
+        server: Server = await crud.get_server(db, server_id)
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Server not found")
+
+    # Start the server container'
+    image_name: str = f"fourdrinier-server-{server_id}"
+    container_id: str = await start_container(image_name)
+
+    return JSONResponse(content={"container": {"id": container_id, "name": image_name}})
