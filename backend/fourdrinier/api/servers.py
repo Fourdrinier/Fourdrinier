@@ -98,6 +98,6 @@ async def start_server(server_id: str, db: AsyncSession = Depends(get_db)) -> JS
 
     # Start the server container'
     image_name: str = f"fourdrinier-server-{server_id}"
-    container_id: str = await start_container(image_name)
+    container_id: str = await start_container()
 
     return JSONResponse(content={"container": {"id": container_id, "name": image_name}})

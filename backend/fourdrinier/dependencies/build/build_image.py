@@ -33,13 +33,16 @@ async def build_dockerfile(
     WORKDIR /server
 
     # Download the server jar
-    ADD {loader_url} /server/server.jar
+    ADD {loader_url} server.jar
+
+    # Agree to the EULA
+    RUN echo "eula=true" > eula.txt
 
     # Expose the port for incoming connections
     EXPOSE {server_port}
 
     # Run the server
-    CMD java -Xms{min_memory}M -Xmx{max_memory}M -jar server.jar
+    CMD ["java", "-Xms{min_memory}M", "-Xmx{max_memory}M", "-jar", "server.jar", "nogui"]
     """
     return textwrap.dedent(content).strip()
 
@@ -55,7 +58,7 @@ async def build_image(dockerfile_content: str, image_name: str) -> str:
 
     # Create an in-memory tar archive containing the Dockerfile
     with tarfile.TarFile(fileobj=tar_stream, mode="w") as tar:
-        dockerfile_data = dockerfile_content.encode("utf-8")
+        dockerfile_data: bytes = dockerfile_content.encode("utf-8")
         dockerfile_info = tarfile.TarInfo(name="Dockerfile")
         dockerfile_info.size = len(dockerfile_data)
 
