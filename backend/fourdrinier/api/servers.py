@@ -10,6 +10,9 @@ All rights reserved. This file is part of the Fourdrinier project and is release
 the GPLv3 License. See the LICENSE file for more details.
 """
 
+import os
+from pathlib import Path
+
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException
@@ -69,9 +72,14 @@ async def start_server(server_id: str, db: AsyncSession = Depends(get_db)) -> JS
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Server not found")
 
+    # Server storage path
+    storage_path: Path = Path(f"/storage/{server.id}")
+    storage_path.mkdir(exist_ok=True)
+    host_storage_path: str = f"{os.getenv('STORAGE_PATH')}/{server.id}"
+
     # Start the server container'
     image_name: str = f"fourdrinier-server-{server.id}"
-    container_id: str = await start_container(image_name)
+    container_id: str = await start_container(image_name, host_storage_path)
 
     return JSONResponse(content={"container": {"id": container_id, "name": image_name}})
 

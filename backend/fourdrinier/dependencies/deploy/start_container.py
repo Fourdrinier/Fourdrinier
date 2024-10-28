@@ -16,7 +16,7 @@ from docker.models.containers import Container
 from docker.models.images import Image
 
 
-async def start_container(image_name: str) -> str:
+async def start_container(image_name: str, storage_path: str) -> str:
     """
     Start a server container
     """
@@ -39,6 +39,7 @@ async def start_container(image_name: str) -> str:
         tty=True,  # Allocates a pseudo-TTY
         stdin_open=True,  # Keeps stdin open, equivalent to -i
         ports={"25565/tcp": 25565},  # Port forward host:container
+        volumes={storage_path: {"bind": "/data", "mode": "rw"}},
     )
     if container.id is None:
         raise RuntimeError("Failed to start container")

@@ -72,6 +72,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
       DOCKER_HOST: $DOCKER_HOST_OVERRIDE
+      STORAGE_PATH: $STORAGE_PATH
     ports:
       - "8000:8000"
     depends_on:
@@ -83,6 +84,7 @@ services:
     volumes:
       - ./ssh:/root/.ssh
       - /var/run/docker.sock:/var/run/docker.sock
+      - $STORAGE_PATH:/storage
     profiles: [ default ]
 
 volumes:

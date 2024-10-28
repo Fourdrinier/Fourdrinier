@@ -1,7 +1,8 @@
 # Fourdrinier To-Do
 
-- [ ] Enable local docker run
-- [ ] Enable local docker file storage
+- [X] Enable local docker run
+- [X] Enable local docker file storage
+- [ ] Enable server deletion
 - [ ] Create frontend
 - [ ] Enable server configuration
 - [ ] Create playset architecture
