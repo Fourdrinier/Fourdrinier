@@ -23,6 +23,7 @@ from backend.fourdrinier.db.schema import ServerCreate
 from backend.fourdrinier.db.schema import ServerResponse
 from backend.fourdrinier.db.session import get_db
 from backend.fourdrinier.dependencies.deploy.start_container import start_container
+from backend.fourdrinier.dependencies.deploy.start_container import stop_container
 
 
 router = APIRouter()
@@ -69,7 +70,24 @@ async def start_server(server_id: str, db: AsyncSession = Depends(get_db)) -> JS
         raise HTTPException(status_code=404, detail="Server not found")
 
     # Start the server container'
-    image_name: str = f"fourdrinier-server-{server_id}"
-    container_id: str = await start_container()
+    image_name: str = f"fourdrinier-server-{server.id}"
+    container_id: str = await start_container(image_name)
 
     return JSONResponse(content={"container": {"id": container_id, "name": image_name}})
+
+
+@router.put("/{server_id}/stop", status_code=200)
+async def stop_server(server_id: str, db: AsyncSession = Depends(get_db)) -> JSONResponse:
+    """
+    Stop a server
+    """
+    try:
+        server: Server = await crud.get_server(db, server_id)
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Server not found")
+
+    # Start the server container'
+    image_name: str = f"fourdrinier-server-{server.id}"
+    await stop_container(image_name)
+
+    return JSONResponse(content={"message": "Server stopped"})

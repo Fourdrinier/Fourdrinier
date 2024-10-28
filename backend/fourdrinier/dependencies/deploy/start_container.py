@@ -16,7 +16,7 @@ from docker.models.containers import Container
 from docker.models.images import Image
 
 
-async def start_container() -> str:
+async def start_container(image_name: str) -> str:
     """
     Start a server container
     """
@@ -29,8 +29,10 @@ async def start_container() -> str:
 
     container: Container = client.containers.run(
         image,
+        name=image_name,
         detach=True,
-        environment={"EULA": "true", "VERSION": "1.20.1"},
+        environment={"EULA": "true", "VERSION": "1.20.1", "MOTD": "A Fourdrinier Server"},
+        remove=True,  # Remove the container when it stops
         tty=True,  # Allocates a pseudo-TTY
         stdin_open=True,  # Keeps stdin open, equivalent to -i
         ports={"25565/tcp": 25565},  # Port forward host:container
@@ -39,3 +41,19 @@ async def start_container() -> str:
         raise RuntimeError("Failed to start container")
 
     return container.id
+
+
+async def stop_container(image_name: str) -> None:
+    """
+    Stop a server container
+    """
+    client = docker.DockerClient(base_url=os.getenv("DOCKER_HOST"))
+
+    try:
+        container: Container = client.containers.get(image_name)
+    except docker.errors.NotFound:
+        return
+
+    container.stop()
+    container.remove()
+    return
