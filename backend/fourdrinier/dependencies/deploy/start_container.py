@@ -20,7 +20,10 @@ async def start_container(image_name: str) -> str:
     """
     Start a server container
     """
-    client = docker.DockerClient(base_url=os.getenv("DOCKER_HOST"))
+    docker_host: str | None = os.getenv("DOCKER_HOST")
+    if docker_host is None or docker_host == "":
+        docker_host = "unix:///var/run/docker.sock"
+    client = docker.DockerClient(base_url=docker_host)
 
     try:
         image: Image = client.images.get("itzg/minecraft-server:java17-alpine")
@@ -55,5 +58,4 @@ async def stop_container(image_name: str) -> None:
         return
 
     container.stop()
-    container.remove()
     return
