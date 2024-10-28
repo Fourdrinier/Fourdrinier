@@ -11,8 +11,10 @@ the GPLv3 License. See the LICENSE file for more details.
 """
 
 import os
+import shutil
 from pathlib import Path
 
+from docker.errors import NotFound
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException
@@ -60,6 +62,32 @@ async def get_server(server_id: str, db: AsyncSession = Depends(get_db)) -> Serv
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Server not found")
     return server
+
+
+@router.delete("/{server_id}", status_code=200)
+async def delete_server(server_id: str, db: AsyncSession = Depends(get_db)) -> None:
+    """
+    Get a server by ID
+    """
+    # Stop the server container
+    try:
+        image_name: str = f"fourdrinier-server-{server_id}"
+        await stop_container(image_name)
+    except NotFound:
+        pass
+
+    # Remove the server's storage directory
+    storage_path: Path = Path(f"/storage/{server_id}")
+    if storage_path.exists() and storage_path.is_dir():
+        shutil.rmtree(storage_path, ignore_errors=True)
+
+    # Remove the server from the database
+    try:
+        await crud.delete_server(db, server_id)
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Server not found")
+
+    return
 
 
 @router.post("/{server_id}/start", status_code=201)

@@ -2,7 +2,7 @@
 
 - [X] Enable local docker run
 - [X] Enable local docker file storage
-- [ ] Enable server deletion
+- [X] Enable server deletion
 - [ ] Create frontend
 - [ ] Enable server configuration
 - [ ] Create playset architecture

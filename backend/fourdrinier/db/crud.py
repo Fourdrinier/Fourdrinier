@@ -23,6 +23,15 @@ from backend.fourdrinier.db.models import Server
 from backend.fourdrinier.db.schema import ServerCreate
 
 
+async def list_servers(db: AsyncSession) -> list[Server]:
+    """
+    Retrieve all server objects from the database.
+    """
+    result: Result[Tuple[Server]] = await db.execute(select(Server))
+    servers: Sequence[Server] = result.scalars().all()
+    return list(servers)
+
+
 async def create_server(db: AsyncSession, server: ServerCreate) -> Server:
     """
     Create a new server object in the database.
@@ -49,10 +58,13 @@ async def get_server(db: AsyncSession, server_id: str) -> Server:
     return server
 
 
-async def list_servers(db: AsyncSession) -> list[Server]:
+async def delete_server(db: AsyncSession, server_id: str) -> None:
     """
-    Retrieve all server objects from the database.
+    Delete a server object from the database.
     """
-    result: Result[Tuple[Server]] = await db.execute(select(Server))
-    servers: Sequence[Server] = result.scalars().all()
-    return list(servers)
+    server: Server | None = await db.get(Server, server_id)
+    if server is None:
+        raise NoResultFound
+    await db.delete(server)
+    await db.commit()
+    return None
