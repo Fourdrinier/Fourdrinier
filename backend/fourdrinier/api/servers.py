@@ -22,8 +22,6 @@ from backend.fourdrinier.db.models import Server
 from backend.fourdrinier.db.schema import ServerCreate
 from backend.fourdrinier.db.schema import ServerResponse
 from backend.fourdrinier.db.session import get_db
-from backend.fourdrinier.dependencies.build.build_image import build_dockerfile
-from backend.fourdrinier.dependencies.build.build_image import build_image
 from backend.fourdrinier.dependencies.deploy.start_container import start_container
 
 
@@ -58,32 +56,6 @@ async def get_server(server_id: str, db: AsyncSession = Depends(get_db)) -> Serv
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Server not found")
     return server
-
-
-@router.post("/{server_id}/build", status_code=201)
-async def build_server(server_id: str, db: AsyncSession = Depends(get_db)) -> JSONResponse:
-    """
-    Build a server
-    """
-    try:
-        server: Server = await crud.get_server(db, server_id)
-    except NoResultFound:
-        raise HTTPException(status_code=404, detail="Server not found")
-
-    # Build the Dockerfile content
-    dockerfile: str = await build_dockerfile(
-        17,
-        f"https://api.papermc.io/v2/projects/paper/versions/1.20.1/builds/196/downloads/paper-1.20.1-196.jar",
-        25565,
-        2048,
-        2048,
-    )
-
-    # Build the Docker image
-    image_name = f"fourdrinier-server-{server_id}"
-    image_id: str = await build_image(dockerfile, image_name)
-
-    return JSONResponse(content={"image": {"id": image_id, "name": image_name}})
 
 
 @router.post("/{server_id}/start", status_code=201)
