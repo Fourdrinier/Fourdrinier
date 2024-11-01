@@ -1,91 +1,120 @@
+#########################################################
+# Bases
+#########################################################
+x-postgres_base: &postgres-base
+  image: postgres:15
+  restart: always
+  hostname: postgres
+  environment:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_DB: postgres
+    PGUSER: postgres
+  ports:
+    - "5432:5432"
+  networks:
+    - fourdrinier-network
+  healthcheck:
+    test: [ "CMD", "pg_isready" ]
+    interval: 5s
+    timeout: 5s
+    retries: 5
+
+x-backend_base: &backend-base
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+  image: fourdrinier-backend
+  environment:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_DB: postgres
+    DOCKER_HOST: $DOCKER_HOST_OVERRIDE
+    STORAGE_PATH: $STORAGE_PATH
+  ports:
+    - "8000:8000"
+  networks:
+    - fourdrinier-network
+    - bridge-network
+  volumes:
+    - ./ssh:/root/.ssh
+    - /var/run/docker.sock:/var/run/docker.sock
+    - $STORAGE_PATH:/storage
+
+x-frontend-base: &frontend-base
+  image: fourdrinier-frontend
+  ports:
+    - "3001:3001"
+  environment:
+    BACKEND_HOST: backend
+    BACKEND_PORT: 8000
+  networks:
+    - fourdrinier-network
+
 services:
+  #########################################################
+  # Database
+  #########################################################
+  postgres:
+    <<: *postgres-base
+    volumes:
+      - db-data:/var/lib/postgresql/data:cached
+    profiles: [ production ]
 
   postgres_test:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-      PGUSER: postgres
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: [ "CMD", "pg_isready" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    <<: *postgres-base
     volumes:
       - test-data:/var/lib/postgresql/data:cached
     profiles: [ testing ]
 
+  #########################################################
+  # Backend
+  #########################################################
+  backend:
+    <<: *backend-base
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles: [ production ]
+
   backend_test:
+    <<: *backend-base
     build:
       context: ./backend
       dockerfile: Dockerfile
       target: test
-    image: fourdrinier-backend
-    environment:
-      POSTGRES_HOST: postgres_test
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - "8000:8000"
     depends_on:
       postgres_test:
         condition: service_healthy
     profiles: [ testing ]
 
-  postgres:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-      PGUSER: postgres
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: [ "CMD", "pg_isready" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - db-data:/var/lib/postgresql/data:cached
-    networks:
-      - fourdrinier-network
-    profiles: [ default ]
-
-  backend:
+  #########################################################
+  # Frontend
+  #########################################################
+  frontend:
+    <<: *frontend-base
     build:
-      context: ./backend
+      context: ./frontend
       dockerfile: Dockerfile
       target: prod
-    image: fourdrinier-backend
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-      DOCKER_HOST: $DOCKER_HOST_OVERRIDE
-      STORAGE_PATH: $STORAGE_PATH
-    ports:
-      - "8000:8000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - fourdrinier-network
-      - bridge-network
+    profiles: [ production ]
+
+  frontend_debug:
+    <<: *frontend-base
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: debug
     volumes:
-      - ./ssh:/root/.ssh
-      - /var/run/docker.sock:/var/run/docker.sock
-      - $STORAGE_PATH:/storage
-    profiles: [ default ]
+      - ./frontend/app:/app/app
+      - ./frontend/public:/app/public
+    profiles: [ debug ]
 
 volumes:
   db-data:

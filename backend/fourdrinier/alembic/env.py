@@ -33,6 +33,7 @@ target_metadata: MetaData = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 def get_default_url() -> str:
+    print(f"ASYNC_DATABASE_URL: {ASYNC_DATABASE_URL}")
     return ASYNC_DATABASE_URL
 
 

@@ -4,7 +4,7 @@
 SHELL := /bin/bash
 
 # Docker configurations
-PRODUCTION_CONFIG = --profile default
+PRODUCTION_CONFIG = --profile production
 TESTING_CONFIG = --profile testing
 
 ALEMBIC_TAG ?= "initial revision"
@@ -24,7 +24,7 @@ build-backend-test:
 # Run the application
 run: build-backend
 	@echo "Running the application..."
-	@docker compose $(PRODUCTION_CONFIG) up
+	@docker compose $(PRODUCTION_CONFIG) up --build
 
 prepare-cache:
 	@echo "Preparing PyTest cache..."
