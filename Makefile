@@ -6,6 +6,7 @@ SHELL := /bin/bash
 # Docker configurations
 PRODUCTION_CONFIG = --profile production
 TESTING_CONFIG = --profile testing
+DEBUG_CONFIG = --profile debug
 
 ALEMBIC_TAG ?= "initial revision"
 
@@ -30,6 +31,10 @@ prepare-cache:
 	@echo "Preparing PyTest cache..."
 	@mkdir -p $(PWD)/.pytest_cache
 
+debug: prepare-cache
+	@echo "Running the application in debug mode..."
+	@docker compose $(DEBUG_CONFIG) up --build
+
 # Run the application tests
 test: prepare-cache build-backend-test
 	@echo "Running the application for testing..."
@@ -49,6 +54,7 @@ cleanup:
 	@echo "Cleaning up..."
 	@docker compose $(PRODUCTION_CONFIG) down --volumes
 	@docker compose $(TESTING_CONFIG) down --volumes
+	@docker compose $(DEBUG_CONFIG) down --volumes
 
 # Generate an Alembic revision file
 revision: build-backend

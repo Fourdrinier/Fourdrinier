@@ -79,3 +79,8 @@ COPY ./scripts /fd/backend/scripts
 COPY ./test /fd/backend/tests
 COPY ./test/pytest.ini /fd/
 COPY ./test/.coveragerc /fd/
+
+EXPOSE 8000
+
+# Run the FastAPI server
+CMD python3 -m alembic upgrade head && python -m uvicorn backend.fourdrinier.main:app --reload --host 0.0.0.0 --port 8000

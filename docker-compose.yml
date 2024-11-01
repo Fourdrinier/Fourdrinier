@@ -46,7 +46,7 @@ x-backend_base: &backend-base
 x-frontend-base: &frontend-base
   image: fourdrinier-frontend
   ports:
-    - "3001:3001"
+    - "3000:3000"
   environment:
     BACKEND_HOST: backend
     BACKEND_PORT: 8000
@@ -67,7 +67,7 @@ services:
     <<: *postgres-base
     volumes:
       - test-data:/var/lib/postgresql/data:cached
-    profiles: [ testing ]
+    profiles: [ testing, debug ]
 
   #########################################################
   # Backend
@@ -93,6 +93,19 @@ services:
       postgres_test:
         condition: service_healthy
     profiles: [ testing ]
+
+  backend_debug:
+    <<: *backend-base
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: test
+    depends_on:
+      postgres_test:
+        condition: service_healthy
+    volumes:
+      - ./backend/fourdrinier:/fd/backend/fourdrinier
+    profiles: [ debug ]
 
   #########################################################
   # Frontend

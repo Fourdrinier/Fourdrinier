@@ -20,12 +20,17 @@ RUN npm run build
 # Debug
 #########################################################
 FROM base AS debug
+
+EXPOSE 3000
+
 CMD npm run dev
 
 #########################################################
 # Production
 #########################################################
 FROM nginx:1.27.2-alpine-slim AS prod
+
+EXPOSE 3000
 
 WORKDIR /app
 COPY --from=base /app/out /usr/share/nginx/html
