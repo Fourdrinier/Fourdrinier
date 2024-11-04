@@ -22,6 +22,10 @@ build-backend-test:
 	@echo "Building the backend for testing..."
 	@docker compose $(TESTING_CONFIG) build backend_test
 
+build-frontend:
+	@echo "Building the frontend..."
+	@docker compose $(PRODUCTION_CONFIG) build frontend
+
 # Run the application
 run: build-backend
 	@echo "Running the application..."

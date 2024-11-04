@@ -125,8 +125,7 @@ services:
       dockerfile: Dockerfile
       target: debug
     volumes:
-      - ./frontend/app:/app/app
-      - ./frontend/public:/app/public
+      - ./frontend:/app
     profiles: [ debug ]
 
 volumes:
