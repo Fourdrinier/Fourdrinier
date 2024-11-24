@@ -38,6 +38,7 @@ x-backend_base: &backend-base
   networks:
     - fourdrinier-network
     - bridge-network
+  hostname: backend
   volumes:
     - ./ssh:/root/.ssh
     - /var/run/docker.sock:/var/run/docker.sock
