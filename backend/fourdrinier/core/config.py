@@ -14,14 +14,5 @@ import os
 
 
 PROJECT_NAME = "fourdrinier"
-
-# Base URL for PostgreSQL database
-POSTGRES_URL_BASE: str = (
-    f"{os.getenv('POSTGRES_USER', 'postgres')}:{os.getenv('POSTGRES_PASSWORD', 'postgres')}"
-    f"@{os.getenv('POSTGRES_HOST', 'postgres')}:{os.getenv('POSTGRES_PORT', '5432')}"
-    f"/{os.getenv('POSTGRES_DB', 'fourdrinier')}"
-)
-
-# Database URLs (with driver prefixes) for use by SQLAlchemy and Alembic
-DATABASE_URL: str = f"postgresql://{POSTGRES_URL_BASE}"
-ASYNC_DATABASE_URL: str = f"postgresql+asyncpg://{POSTGRES_URL_BASE}"
+DB_URL: str = os.getenv("DB_URL", "sqlite+aiosqlite:///./db-data/fourdrinier.db")
+DOCKER_HOST: str | None = os.getenv("DOCKER_HOST", "/var/run/docker.sock")

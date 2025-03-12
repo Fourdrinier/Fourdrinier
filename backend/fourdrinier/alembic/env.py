@@ -8,7 +8,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlalchemy.sql.schema import MetaData
 
-from backend.fourdrinier.core.config import ASYNC_DATABASE_URL
+from backend.fourdrinier.core.config import DB_URL
 from backend.fourdrinier.db.models import Base
 
 
@@ -33,8 +33,8 @@ target_metadata: MetaData = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 def get_default_url() -> str:
-    print(f"ASYNC_DATABASE_URL: {ASYNC_DATABASE_URL}")
-    return ASYNC_DATABASE_URL
+    print(f"DB_URL: {DB_URL}")
+    return DB_URL
 
 
 config.set_main_option("sqlalchemy.url", get_default_url())

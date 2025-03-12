@@ -1,36 +1,12 @@
 #########################################################
 # Bases
 #########################################################
-x-postgres_base: &postgres-base
-  image: postgres:15
-  restart: always
-  hostname: postgres
-  environment:
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_DB: postgres
-    PGUSER: postgres
-  ports:
-    - "5432:5432"
-  networks:
-    - fourdrinier-network
-  healthcheck:
-    test: [ "CMD", "pg_isready" ]
-    interval: 5s
-    timeout: 5s
-    retries: 5
-
 x-backend_base: &backend-base
   build:
     context: ./backend
     dockerfile: Dockerfile
   image: fourdrinier-backend
   environment:
-    POSTGRES_HOST: postgres
-    POSTGRES_PORT: 5432
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_DB: postgres
     DOCKER_HOST: $DOCKER_HOST_OVERRIDE
     STORAGE_PATH: $STORAGE_PATH
   ports:
@@ -38,10 +14,6 @@ x-backend_base: &backend-base
   networks:
     - fourdrinier-network
     - bridge-network
-  volumes:
-    - ./ssh:/root/.ssh
-    - /var/run/docker.sock:/var/run/docker.sock
-    - $STORAGE_PATH:/storage
 
 x-frontend-base: &frontend-base
   image: fourdrinier-frontend
@@ -55,21 +27,6 @@ x-frontend-base: &frontend-base
 
 services:
   #########################################################
-  # Database
-  #########################################################
-  postgres:
-    <<: *postgres-base
-    volumes:
-      - db-data:/var/lib/postgresql/data:cached
-    profiles: [ production ]
-
-  postgres_test:
-    <<: *postgres-base
-    volumes:
-      - test-data:/var/lib/postgresql/data:cached
-    profiles: [ testing, debug ]
-
-  #########################################################
   # Backend
   #########################################################
   backend:
@@ -78,9 +35,12 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: prod
-    depends_on:
-      postgres:
-        condition: service_healthy
+    volumes:
+      - ./tmp:/fd/db-data
+      - ./ssh:/root/.ssh
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $STORAGE_PATH:/storage
+      - ./backend/fourdrinier:/fd/backend/fourdrinier
     profiles: [ production ]
 
   backend_test:
@@ -89,9 +49,12 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: test
-    depends_on:
-      postgres_test:
-        condition: service_healthy
+    volumes:
+      - test-data:/fd/db-data
+      - ./ssh:/root/.ssh
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $STORAGE_PATH:/storage
+
     profiles: [ testing ]
 
   backend_debug:
@@ -100,10 +63,11 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: test
-    depends_on:
-      postgres_test:
-        condition: service_healthy
     volumes:
+      - ./tmp:/fd/db-data
+      - ./ssh:/root/.ssh
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $STORAGE_PATH:/storage
       - ./backend/fourdrinier:/fd/backend/fourdrinier
     profiles: [ debug ]
 

@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import DeclarativeBase
 
-from backend.fourdrinier.core.config import ASYNC_DATABASE_URL
+from backend.fourdrinier.core import config
 
 
 # Create a base class for retrieval of model metadata
@@ -27,7 +27,7 @@ class Base(DeclarativeBase):
 
 
 # Create an asynchronous database engine
-async_engine: AsyncEngine = create_async_engine(ASYNC_DATABASE_URL)
+async_engine: AsyncEngine = create_async_engine(config.DB_URL)
 AsyncSessionMaker = async_sessionmaker(bind=async_engine)
 
 
