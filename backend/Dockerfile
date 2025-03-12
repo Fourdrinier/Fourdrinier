@@ -34,7 +34,7 @@ FROM base AS builder
 COPY pyproject.toml poetry.lock /fd/
 RUN poetry config virtualenvs.create true \
     && poetry config virtualenvs.in-project true \
-    && poetry install --no-dev
+    && poetry install --without dev --no-root
 
 ####################################################################################################
 # Production Image

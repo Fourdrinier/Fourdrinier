@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 
-from backend.fourdrinier.core.config import ASYNC_DATABASE_URL
+from backend.fourdrinier.core.config import DB_URL
 from backend.fourdrinier.db.models import Base
 from backend.fourdrinier.db.session import get_db
 from backend.fourdrinier.main import app
@@ -28,7 +28,7 @@ from backend.fourdrinier.main import app
 
 @pytest.fixture()
 async def test_db_engine() -> AsyncGenerator[AsyncEngine, None]:
-    engine: AsyncEngine = create_async_engine(ASYNC_DATABASE_URL)
+    engine: AsyncEngine = create_async_engine(DB_URL)
     yield engine
     await engine.dispose()
 
