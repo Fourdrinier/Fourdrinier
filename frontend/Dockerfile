@@ -1,39 +1,55 @@
-#########################################################
-# Base
-#########################################################
-FROM node:22.10-alpine3.19 AS base
+# Base Node image
+FROM node:18-alpine AS base
 
+# Install dependencies only when needed
+FROM base AS deps
 WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
 
 # Install dependencies
-COPY ./package.json ./
-COPY ./package-lock.json ./
 RUN npm install
 
-# Copy source code
+# Development image for debugging
+FROM base AS debug
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build the app
+# Expose port
+EXPOSE 3000
+
+# Start Next.js in development mode
+CMD ["npm", "run", "dev"]
+
+# Build the application for production
+FROM base AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build the Next.js application
 RUN npm run build
 
-#########################################################
-# Debug
-#########################################################
-FROM base AS debug
-
-EXPOSE 3000
-
-CMD npm run dev
-
-#########################################################
-# Production
-#########################################################
-FROM nginx:1.27.2-alpine-slim AS prod
-
-EXPOSE 3000
-
+# Production image
+FROM base AS prod
 WORKDIR /app
-COPY --from=base /app/out /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+ENV NODE_ENV production
 
+# Create public directory
+RUN mkdir -p ./public
+
+# Copy necessary files from the builder stage
+# COPY --from=builder /app/public/ ./public/ 2>/dev/null || true
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+# Expose port
+EXPOSE 3000
+
+# Set the command to start the Next.js application
+CMD ["node", "server.js"]
