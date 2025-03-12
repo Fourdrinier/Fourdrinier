@@ -41,7 +41,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - $STORAGE_PATH:/storage
       - ./backend/fourdrinier:/fd/backend/fourdrinier
-    profiles: [ production ]
+    profiles: [production]
 
   backend_test:
     <<: *backend-base
@@ -55,7 +55,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - $STORAGE_PATH:/storage
 
-    profiles: [ testing ]
+    profiles: [testing]
 
   backend_debug:
     <<: *backend-base
@@ -69,7 +69,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - $STORAGE_PATH:/storage
       - ./backend/fourdrinier:/fd/backend/fourdrinier
-    profiles: [ debug ]
+    profiles: [debug]
 
   #########################################################
   # Frontend
@@ -80,7 +80,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: prod
-    profiles: [ production ]
+    profiles: [production]
 
   frontend_debug:
     <<: *frontend-base
@@ -91,12 +91,11 @@ services:
     volumes:
       - ./frontend/app:/app/app
       - ./frontend/public:/app/public
-    profiles: [ debug ]
+    profiles: [debug]
 
 volumes:
   db-data:
   test-data:
-
 
 networks:
   fourdrinier-network:
